@@ -1,0 +1,32 @@
+{
+  "name": "Control de reparaciones de viviendas",
+  "short_name": "Reparaciones",
+  "description": "Registro de reparaciones de viviendas, materiales entregados y fotos.",
+  "lang": "es",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f4c5c",
+  "theme_color": "#0f4c5c",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
