@@ -118,7 +118,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <div><label for="nombre">Nombre del beneficiario <span class="req">*</span></label><input id="nombre" placeholder="Ej. María Pérez"></div>
 <div><label for="tel">Teléfono <span class="req">*</span></label><input id="tel" inputmode="numeric" placeholder="000-000-0000" maxlength="12" autocomplete="off"></div>
 <div><label for="ced">Cédula (número) <span class="req">*</span></label><input id="ced" inputmode="numeric" placeholder="000-0000000-0" maxlength="13" autocomplete="off"></div>
-<div><label for="sector">Calle y número de casa <span class="req">*</span></label><input id="sector" placeholder="Ej. Calle Primera #142" autocomplete="off"></div>
+<div><label for="sector">Dirección <span class="req">*</span></label><input id="sector" placeholder="Ej. Calle Primera #142, sector" autocomplete="off"></div>
 <div><label for="tipo">Tipo de reparación</label>
 <select id="tipo"><option>Techo</option><option>Paredes</option><option>Piso</option><option>Puertas y ventanas</option><option>Baño / letrina</option><option>Instalación eléctrica</option><option>Otra</option></select></div>
 <div hidden><label for="estado">Estado</label>
@@ -145,7 +145,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <section class="card" id="v-lista" hidden>
 <h2>Informes guardados</h2>
 <div class="tools">
-<input id="q" placeholder="Buscar por nombre o calle" aria-label="Buscar">
+<input id="q" placeholder="Buscar por nombre o dirección" aria-label="Buscar">
 <select id="fm" aria-label="Filtrar por mes"></select>
 <select id="fe" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option>Pendiente</option><option>Terminada</option></select>
 </div>
@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 18-oct-2026 (8)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 18-oct-2026 (9)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -242,7 +242,7 @@ $("ced").addEventListener("input",function(){this.value=fmtCed(this.value)});
 $("tel").addEventListener("input",function(){this.value=fmtTel(this.value)});
 ["nombre","tel","ced","sector"].forEach(function(i){$(i).addEventListener("input",function(){this.style.borderColor=""})});
 $("save").onclick=function(){var nombre=$("nombre").value.trim();
-var RQ=[["nombre","el nombre del beneficiario"],["tel","el teléfono"],["ced","el número de cédula"],["sector","la calle y el número de casa"]],miss=[];
+var RQ=[["nombre","el nombre del beneficiario"],["tel","el teléfono"],["ced","el número de cédula"],["sector","la dirección"]],miss=[];
 RQ.forEach(function(q){var el=$(q[0]),bad=!el.value.trim();el.style.borderColor=bad?"#c0392b":"";if(bad)miss.push(q)});
 var cd=$("ced").value.replace(/\D/g,""),tl=$("tel").value.replace(/\D/g,"");
 if(cd&&cd.length!==11){miss.push(["ced","la cédula completa (000-0000000-0: 11 números)"]);$("ced").style.borderColor="#c0392b"}
