@@ -120,8 +120,8 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <div><label for="sector">Sector / dirección <span class="req">*</span></label><input id="sector"></div>
 <div><label for="tipo">Tipo de reparación</label>
 <select id="tipo"><option>Techo</option><option>Paredes</option><option>Piso</option><option>Puertas y ventanas</option><option>Baño / letrina</option><option>Instalación eléctrica</option><option>Otra</option></select></div>
-<div><label for="estado">Estado</label>
-<select id="estado"><option>Pendiente</option><option>En proceso</option><option>Terminada</option></select></div>
+<div hidden><label for="estado">Estado</label>
+<select id="estado"><option>Pendiente</option><option>Terminada</option></select></div>
 </div>
 <div style="margin-top:12px"><label for="notas">Notas</label><textarea id="notas" rows="2"></textarea></div>
 <div class="row" style="margin-top:14px"><button class="p" type="button" id="save">Guardar datos y continuar →</button><button type="button" id="cancel" hidden>Cerrar y empezar otro</button></div>
@@ -145,7 +145,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <div class="tools">
 <input id="q" placeholder="Buscar por nombre o sector" aria-label="Buscar">
 <select id="fm" aria-label="Filtrar por mes"></select>
-<select id="fe" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option>Pendiente</option><option>En proceso</option><option>Terminada</option></select>
+<select id="fe" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option>Pendiente</option><option>Terminada</option></select>
 </div>
 <div id="list"></div>
 <div class="row"><button type="button" id="copyres">Copiar resumen</button></div>
@@ -182,6 +182,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0">Versión 18-oct-2026 (3)</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
 <dialog id="dlg"><img id="big" alt="Foto ampliada"><button type="button" id="closed">Cerrar</button></dialog>
@@ -243,14 +244,14 @@ var cd=$("ced").value.replace(/\D/g,""),tl=$("tel").value.replace(/\D/g,"");
 if(cd&&cd.length!==11){miss.push(["ced","la cédula completa (000-0000000-0: 11 números)"]);$("ced").style.borderColor="#c0392b"}
 if(tl&&tl.length!==10){miss.push(["tel","el teléfono completo (000-000-0000: 10 números)"]);$("tel").style.borderColor="#c0392b"}
 if(miss.length){alert("Campos obligatorios sin llenar:\n• "+miss.map(function(q){return q[1]}).join("\n• "));$(miss[0][0]).focus();return}
-var f={fecha:$("fecha").value||today(),nombre:nombre,tel:fmtTel($("tel").value),ced:fmtCed($("ced").value),sector:$("sector").value.trim(),tipo:$("tipo").value,estado:$("estado").value,notas:$("notas").value.trim()},r=curRec();
+var f={fecha:$("fecha").value||today(),nombre:nombre,tel:fmtTel($("tel").value),ced:fmtCed($("ced").value),sector:$("sector").value.trim(),tipo:$("tipo").value,estado:(curRec()&&curRec().estado==="Terminada"?"Terminada":"Pendiente"),notas:$("notas").value.trim()},r=curRec();
 if(r){Object.assign(r,f)}else{r=Object.assign({id:String(Date.now()),mats:formMats()},f);data.push(r);editId=r.id;if(Object.keys(fot).length){cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id])}}
 persist();render();stepUI();show("mats")};
 $("savem").onclick=function(){var r=curRec();if(!r){alert("Primero guarda los datos del beneficiario en «Nuevo informe».");show("nuevo");return}
 r.mats=formMats();persist();render();stepUI();show("fotos")};
 $("savef").onclick=function(){var r=curRec();if(!r){alert("Primero guarda los datos del beneficiario en «Nuevo informe».");show("nuevo");return}
 var falta=SL.filter(function(x){return x[0]!=="despues"&&!fot[x[0]]});if(falta.length){alert("Faltan fotos obligatorias:\n• "+falta.map(function(x){return x[1]}).join("\n• "));return}
-cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id]);persist();render();var nm=r.nombre;resetForm();clearDraft();show("home");$("sv").textContent="✓ Informe de "+nm+" guardado completo"};
+r.estado="Terminada";cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id]);persist();render();var nm=r.nombre;resetForm();clearDraft();show("home");$("sv").textContent="✓ Informe de "+nm+" guardado completo"};
 function edit(id){var d=data.filter(function(x){return x.id===id})[0];if(!d)return;editId=id;
 $("fecha").value=d.fecha;$("nombre").value=d.nombre;$("tel").value=d.tel;$("ced").value=d.ced||"";$("sector").value=d.sector;$("tipo").value=d.tipo;$("estado").value=d.estado;$("notas").value=d.notas;
 $("mats").innerHTML="";d.mats.forEach(function(m){matRow(m.n,m.q)});if(!d.mats.length)matRow("","");
@@ -264,13 +265,14 @@ return data.filter(function(d){return(!q||(d.nombre+" "+d.sector).toLowerCase().
 function sums(rows){var t={};rows.forEach(function(d){d.mats.forEach(function(m){var k=m.n.toLowerCase();t[k]=t[k]||{n:m.n,q:0};t[k].q+=m.q})});return Object.keys(t).map(function(k){return t[k]})}
 var OPEN={};
 
-function render(){
+function normEst(){data.forEach(function(d){if(d.estado!=="Terminada")d.estado="Pendiente"})}
+function render(){normEst();
 var cur=$("fm").value,ms={};data.forEach(function(d){ms[d.fecha.slice(0,7)]=1});
 $("fm").innerHTML='<option value="">Todos los meses</option>'+Object.keys(ms).sort().reverse().map(function(m){return'<option value="'+m+'">'+m+'</option>'}).join("");$("fm").value=cur;
 var rows=filtered(),done=rows.filter(function(d){return d.estado==="Terminada"}).length;
 var hoy=today(),hA=data.filter(function(d){return d.fecha===hoy}),hT=hA.filter(function(d){return d.estado==="Terminada"}).length,tT=data.filter(function(d){return d.estado==="Terminada"}).length;
 $("totals").innerHTML='<div class="t"><b>'+hA.length+'</b><span>Viviendas atendidas hoy</span></div><div class="t"><b>'+hT+'</b><span>Terminadas hoy</span></div><div class="t"><b>'+data.length+'</b><span>Total viviendas atendidas</span></div><div class="t"><b>'+tT+'</b><span>Total viviendas terminadas</span></div>';
-$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> <select class="qs" data-s="'+d.id+'" aria-label="Cambiar estado">'+ST.map(function(o){return'<option'+(o===d.estado?' selected':'')+'>'+o+'</option>'}).join("")+'</select></div><div class="row" style="margin-top:6px"><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
+$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> '+esc(d.estado)+'</div><div class="row" style="margin-top:6px"><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
 $("list").querySelectorAll("[data-e]").forEach(function(b){b.onclick=function(){edit(b.dataset.e)}});
 $("list").querySelectorAll("[data-d]").forEach(function(b){b.onclick=function(){del(b.dataset.d)}});$("list").querySelectorAll(".th img").forEach(function(i){i.onclick=function(){big(i.src)}});$("list").querySelectorAll("[data-s]").forEach(function(s){s.onchange=function(){data.forEach(function(d){if(d.id===s.dataset.s)d.estado=s.value});persist();render()}});$("list").querySelectorAll("details.fila").forEach(function(el){el.addEventListener("toggle",function(){if(el.open)OPEN[el.dataset.id]=1;else delete OPEN[el.dataset.id]})});fillDL()}
 function copy(txt){var o=$("out");o.value=txt;o.style.display="block";o.select();
