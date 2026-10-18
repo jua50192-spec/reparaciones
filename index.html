@@ -135,6 +135,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </div>
 <div id="vw-fotos" hidden>
 <h2 style="margin:0 0 8px">Fotos</h2>
+<p class="mut" style="margin:0 0 8px">Las 3 primeras fotos son obligatorias (en la mañana). Con 3 fotos el informe queda <b>Pendiente</b>. Cuando el trabajo termina, agrega la foto «Vivienda después» y queda <b>Terminada</b>.</p>
 <div class="ph" id="ph"></div>
 <div class="row" style="margin-top:14px"><button class="p" type="button" id="savef">Guardar fotos y terminar ✓</button></div>
 </div>
@@ -182,7 +183,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0">Versión 18-oct-2026 (3)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0">Versión 18-oct-2026 (4)</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
 <dialog id="dlg"><img id="big" alt="Foto ampliada"><button type="button" id="closed">Cerrar</button></dialog>
@@ -251,7 +252,7 @@ $("savem").onclick=function(){var r=curRec();if(!r){alert("Primero guarda los da
 r.mats=formMats();persist();render();stepUI();show("fotos")};
 $("savef").onclick=function(){var r=curRec();if(!r){alert("Primero guarda los datos del beneficiario en «Nuevo informe».");show("nuevo");return}
 var falta=SL.filter(function(x){return x[0]!=="despues"&&!fot[x[0]]});if(falta.length){alert("Faltan fotos obligatorias:\n• "+falta.map(function(x){return x[1]}).join("\n• "));return}
-r.estado="Terminada";cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id]);persist();render();var nm=r.nombre;resetForm();clearDraft();show("home");$("sv").textContent="✓ Informe de "+nm+" guardado completo"};
+r.estado=fot.despues?"Terminada":"Pendiente";cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id]);persist();render();var nm=r.nombre;resetForm();clearDraft();show("home");$("sv").textContent="✓ Informe de "+nm+" guardado"+(r.estado==="Terminada"?" · Terminada (4 fotos)":" · Pendiente (falta la foto de la vivienda después)")};
 function edit(id){var d=data.filter(function(x){return x.id===id})[0];if(!d)return;editId=id;
 $("fecha").value=d.fecha;$("nombre").value=d.nombre;$("tel").value=d.tel;$("ced").value=d.ced||"";$("sector").value=d.sector;$("tipo").value=d.tipo;$("estado").value=d.estado;$("notas").value=d.notas;
 $("mats").innerHTML="";d.mats.forEach(function(m){matRow(m.n,m.q)});if(!d.mats.length)matRow("","");
