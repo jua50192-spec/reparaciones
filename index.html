@@ -112,6 +112,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <p id="stepinfo" class="mut" style="margin:0 0 12px"></p>
 <p id="dn" class="mut" role="status" hidden style="margin:-4px 0 10px">Se recuperó lo que estabas llenando.</p>
 <div id="vw-nuevo">
+<div id="bform" style="margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:6px"><span id="bftxt"></span> <button type="button" id="bsync" hidden>Usar el barrio de arriba</button></div>
 <div class="grid">
 <div><label for="fecha">Fecha</label><input type="date" id="fecha"></div>
 <div><label for="nombre">Nombre del beneficiario <span class="req">*</span></label><input id="nombre" placeholder="Ej. María Pérez"></div>
@@ -183,7 +184,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0">Versión 18-oct-2026 (4)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0">Versión 18-oct-2026 (5)</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
 <dialog id="dlg"><img id="big" alt="Foto ampliada"><button type="button" id="closed">Cerrar</button></dialog>
@@ -244,9 +245,10 @@ RQ.forEach(function(q){var el=$(q[0]),bad=!el.value.trim();el.style.borderColor=
 var cd=$("ced").value.replace(/\D/g,""),tl=$("tel").value.replace(/\D/g,"");
 if(cd&&cd.length!==11){miss.push(["ced","la cédula completa (000-0000000-0: 11 números)"]);$("ced").style.borderColor="#c0392b"}
 if(tl&&tl.length!==10){miss.push(["tel","el teléfono completo (000-000-0000: 10 números)"]);$("tel").style.borderColor="#c0392b"}
+if(!(curRecB()&&curRecB().barrio)&&!BAR){alert("Escribe primero el «Barrio donde se trabaja» (en la parte de arriba) para guardar el informe.");$("barrio").scrollIntoView();$("barrio").focus();return}
 if(miss.length){alert("Campos obligatorios sin llenar:\n• "+miss.map(function(q){return q[1]}).join("\n• "));$(miss[0][0]).focus();return}
 var f={fecha:$("fecha").value||today(),nombre:nombre,tel:fmtTel($("tel").value),ced:fmtCed($("ced").value),sector:$("sector").value.trim(),tipo:$("tipo").value,estado:(curRec()&&curRec().estado==="Terminada"?"Terminada":"Pendiente"),notas:$("notas").value.trim()},r=curRec();
-if(r){Object.assign(r,f)}else{r=Object.assign({id:String(Date.now()),mats:formMats()},f);data.push(r);editId=r.id;if(Object.keys(fot).length){cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id])}}
+if(r){Object.assign(r,f);if(!r.barrio)r.barrio=BAR}else{r=Object.assign({id:String(Date.now()),mats:formMats(),barrio:BAR},f);data.push(r);editId=r.id;if(Object.keys(fot).length){cache[r.id]=Object.assign({},fot);putF(r.id,cache[r.id])}}
 persist();render();stepUI();show("mats")};
 $("savem").onclick=function(){var r=curRec();if(!r){alert("Primero guarda los datos del beneficiario en «Nuevo informe».");show("nuevo");return}
 r.mats=formMats();persist();render();stepUI();show("fotos")};
@@ -273,7 +275,7 @@ $("fm").innerHTML='<option value="">Todos los meses</option>'+Object.keys(ms).so
 var rows=filtered(),done=rows.filter(function(d){return d.estado==="Terminada"}).length;
 var hoy=today(),hA=data.filter(function(d){return d.fecha===hoy}),hT=hA.filter(function(d){return d.estado==="Terminada"}).length,tT=data.filter(function(d){return d.estado==="Terminada"}).length;
 $("totals").innerHTML='<div class="t"><b>'+hA.length+'</b><span>Viviendas atendidas hoy</span></div><div class="t"><b>'+hT+'</b><span>Terminadas hoy</span></div><div class="t"><b>'+data.length+'</b><span>Total viviendas atendidas</span></div><div class="t"><b>'+tT+'</b><span>Total viviendas terminadas</span></div>';
-$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> '+esc(d.estado)+'</div><div class="row" style="margin-top:6px"><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
+$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+(d.barrio?'Barrio '+esc(d.barrio)+' · ':'')+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> '+esc(d.estado)+'</div><div class="row" style="margin-top:6px"><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
 $("list").querySelectorAll("[data-e]").forEach(function(b){b.onclick=function(){edit(b.dataset.e)}});
 $("list").querySelectorAll("[data-d]").forEach(function(b){b.onclick=function(){del(b.dataset.d)}});$("list").querySelectorAll(".th img").forEach(function(i){i.onclick=function(){big(i.src)}});$("list").querySelectorAll("[data-s]").forEach(function(s){s.onchange=function(){data.forEach(function(d){if(d.id===s.dataset.s)d.estado=s.value});persist();render()}});$("list").querySelectorAll("details.fila").forEach(function(el){el.addEventListener("toggle",function(){if(el.open)OPEN[el.dataset.id]=1;else delete OPEN[el.dataset.id]})});fillDL()}
 function copy(txt){var o=$("out");o.value=txt;o.style.display="block";o.select();
@@ -294,12 +296,12 @@ Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}ONLY=nul
 var SEL=null;
 function repRows(){if(ONLY)return [ONLY];if(SEL)return data.filter(function(d){return SEL[d.id]}).sort(function(x,y){return x.fecha.localeCompare(y.fecha)});return data.slice().sort(function(x,y){return x.fecha.localeCompare(y.fecha)})}
 function repHTML(op){var r=repRows(),inf=$("rf").checked,ic=$("rc").checked,c={"Terminada":0,"En proceso":0,"Pendiente":0};r.forEach(function(d){c[d.estado]++});
-var h='<div class="rh"><h1>Informe de reparaciones de viviendas</h1>'+(BAR?'<div>Barrio: '+esc(BAR)+'</div>':"")+($("ri").value?'<div>'+esc($("ri").value)+'</div>':"")+($("rn").value?'<div>Elaborado por: '+esc($("rn").value)+'</div>':"")+'<div class="rs"><div><b>'+r.length+'</b>Viviendas</div><div><b>'+c["Terminada"]+'</b>Terminadas</div></div>';
+var h='<div class="rh"><h1>Informe de reparaciones de viviendas</h1>'+($("ri").value?'<div>'+esc($("ri").value)+'</div>':"")+($("rn").value?'<div>Elaborado por: '+esc($("rn").value)+'</div>':"")+'<div class="rs"><div><b>'+r.length+'</b>Viviendas</div><div><b>'+c["Terminada"]+'</b>Terminadas</div></div>';
 h+='<h2>Detalle por vivienda</h2>';
 r.forEach(function(d){var f=cache[d.id]||{},p="";
 [["antes","Antes"],["despues","Después"]].forEach(function(s){if(inf&&f[s[0]])p+='<figure><img src="'+f[s[0]]+'" alt="'+s[1]+'"><figcaption>'+s[1]+'</figcaption></figure>'});
 if(ic)[["ced","Cédula (frente)"],["cedt","Cédula (trasera)"]].forEach(function(s){p+=f[s[0]]?'<figure><img src="'+f[s[0]]+'" alt="'+s[1]+'"><figcaption>'+s[1]+'</figcaption></figure>':'<figure><figcaption>Sin foto: '+s[1]+'</figcaption></figure>'});
-h+='<details class="rv"'+(op?' open':'')+'><summary style="cursor:pointer;font-weight:700;font-size:1.05rem">'+esc(d.nombre)+' <span style="font-weight:400;font-size:.9rem">· '+esc(fd(d.fecha))+'</span></summary><div style="margin-top:6px">'+esc(fd(d.fecha))+' · '+esc(d.sector)+' · '+esc(d.tipo)+' · '+esc(d.estado)+'</div>'+(ic&&(d.ced||d.tel)?'<div>'+(d.ced?'Cédula: '+esc(d.ced):'')+(d.ced&&d.tel?' &nbsp;&nbsp;&nbsp; ':'')+(d.tel?'Teléfono: '+esc(d.tel):'')+'</div>':"")+(d.notas?'<div>Notas: '+esc(d.notas)+'</div>':"")+'<h4 style="margin:8px 0 4px">Materiales entregados</h4>'+(d.mats.length?'<table class="rt"><tr><th>Material</th><th>Cantidad</th></tr>'+d.mats.map(function(m){return'<tr><td>'+esc(m.n)+'</td><td>'+m.q+' '+un(m.n)+'</td></tr>'}).join("")+'</table>':'<div>Sin materiales registrados.</div>')+(p?'<div class="rph">'+p+'</div>':"")+'</details>'});
+h+='<details class="rv"'+(op?' open':'')+'><summary style="cursor:pointer;font-weight:700;font-size:1.05rem">'+esc(d.nombre)+' <span style="font-weight:400;font-size:.9rem">· '+esc(fd(d.fecha))+'</span></summary><div style="margin-top:6px">'+esc(fd(d.fecha))+' · Barrio: '+esc(d.barrio||BAR)+' · '+esc(d.sector)+' · '+esc(d.tipo)+' · '+esc(d.estado)+'</div>'+(ic&&(d.ced||d.tel)?'<div>'+(d.ced?'Cédula: '+esc(d.ced):'')+(d.ced&&d.tel?' &nbsp;&nbsp;&nbsp; ':'')+(d.tel?'Teléfono: '+esc(d.tel):'')+'</div>':"")+(d.notas?'<div>Notas: '+esc(d.notas)+'</div>':"")+'<h4 style="margin:8px 0 4px">Materiales entregados</h4>'+(d.mats.length?'<table class="rt"><tr><th>Material</th><th>Cantidad</th></tr>'+d.mats.map(function(m){return'<tr><td>'+esc(m.n)+'</td><td>'+m.q+' '+un(m.n)+'</td></tr>'}).join("")+'</table>':'<div>Sin materiales registrados.</div>')+(p?'<div class="rph">'+p+'</div>':"")+'</details>'});
 return h+'</div>'}
 function who(){var n=($("rn").value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-+|-+$/g,"");return n?n+"-":""}
 function readTxt(f){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.onerror=function(){res(null)};fr.readAsText(f)})}
@@ -336,7 +338,7 @@ rw.row.forEach(function(it,k){var x=M+k*(b.cw+4);doc.setFont("helvetica","normal
 if(it[1]){var q=doc.getImageProperties(it[1]),w=b.cw*b.s,h=w*q.height/q.width,xo=x+(b.cw-w)/2;doc.text(it[0],xo,y+3);doc.addImage(it[1],"JPEG",xo,y+4,w,h)}else doc.text(it[0]+": sin foto",x,y+3)});y+=rh+9});y+=2}
 var r=repRows(),inf=$("rf").checked,ic=$("rc").checked,RX=M+90,RW=W-M-RX;
 function hdr(d){tx("Informe de reparaciones de viviendas",18,1,2);
-if(BAR)tx("Barrio: "+BAR,12,1,0);
+var BB=(d&&d.barrio)||BAR;if(BB)tx("Barrio: "+BB,12,1,0);
 if($("ri").value)tx($("ri").value,12,0,0);
 tx(d?"Fecha: "+fd(d.fecha):"Fecha: "+fd(today()),11,0,0);
 if($("rn").value)tx("Elaborado por: "+$("rn").value,11,0,0);
@@ -415,12 +417,15 @@ try{var tt=JSON.parse(localStorage.getItem(TK)||"null");if(Array.isArray(tt))TPL
 function syncTpl(){if(editId)return;var n=[];$("mats").querySelectorAll(".mat").forEach(function(r){var v=r.querySelector("input").value.trim();if(v)n.push(v)});if(JSON.stringify(n)===JSON.stringify(TPL))return;TPL=n;try{localStorage.setItem(TK,JSON.stringify(n))}catch(e){}putF("__tpl",n)}
 var BK="reparaciones_barrio",BAR="";
 try{BAR=localStorage.getItem(BK)||""}catch(e){}
-function drawBar(){$("h1b").textContent=BAR?": "+BAR.toUpperCase():"";document.title="Control de reparaciones de viviendas"+(BAR?" - "+BAR:"")}
+function curRecB(){return editId?data.filter(function(x){return x.id===editId})[0]:null}
+function drawBF(){var r=curRecB(),b=r?(r.barrio||BAR):BAR;$("bftxt").innerHTML="<b>Barrio de este informe:</b> "+(b?esc(b):'<span style="color:#c0392b">falta — escríbelo arriba, en «Barrio donde se trabaja»</span>');$("bsync").hidden=!(r&&BAR&&(r.barrio||"")!==BAR)}
+$("bsync").onclick=function(){var r=curRecB();if(r&&BAR){r.barrio=BAR;persist();drawBF();render()}};
+function drawBar(){drawBF();$("h1b").textContent=BAR?": "+BAR.toUpperCase():"";document.title="Control de reparaciones de viviendas"+(BAR?" - "+BAR:"")}
 $("barrio").value=BAR;drawBar();
 $("barrio").oninput=function(){BAR=this.value.trim();try{localStorage.setItem(BK,BAR)}catch(e){}putF("__barrio",BAR);drawBar()};
 $("matunl").onclick=function(){openPw(LK?"unlock":"create")};
 var VN={nuevo:"Nuevo informe",mats:"Materiales entregados",fotos:"Fotos",lista:"Informes guardados",resp:"Respaldo",inf:"Informe para entregar"};
-function show(v){stepUI();var fm=(v==="nuevo"||v==="mats"||v==="fotos");
+function show(v){stepUI();drawBF();var fm=(v==="nuevo"||v==="mats"||v==="fotos");
 $("home").hidden=v!=="home";$("backbar").hidden=v==="home";$("vname").textContent=VN[v]||"";
 $("formcard").hidden=!fm;["nuevo","mats","fotos"].forEach(function(k){$("vw-"+k).hidden=v!==k});
 $("v-lista").hidden=v!=="lista";$("v-resp").hidden=v!=="resp";$("v-inf").hidden=v!=="inf";
