@@ -255,6 +255,8 @@ function edit(id){var d=data.filter(function(x){return x.id===id})[0];if(!d)retu
 $("fecha").value=d.fecha;$("nombre").value=d.nombre;$("tel").value=d.tel;$("ced").value=d.ced||"";$("sector").value=d.sector;$("tipo").value=d.tipo;$("estado").value=d.estado;$("notas").value=d.notas;
 $("mats").innerHTML="";d.mats.forEach(function(m){matRow(m.n,m.q)});if(!d.mats.length)matRow("","");
 fot=Object.assign({},cache[id]||{});drawSlots();stepUI();show("nuevo")}
+var MSGD=document.createElement("dialog");MSGD.id="msgd";MSGD.innerHTML='<p id="msgt" style="margin:0 0 12px;white-space:pre-line"></p><div class="row" style="margin:0"><button class="p" type="button" id="msgok">Aceptar</button></div>';document.body.appendChild(MSGD);
+var _al=window.alert;window.alert=function(t){try{document.getElementById("msgt").textContent=String(t);document.getElementById("msgok").onclick=function(){MSGD.close()};MSGD.showModal()}catch(e){_al.call(window,t)}};
 function ask(t,cb){$("askt").textContent=t;var d=$("ask");$("askok").onclick=function(){d.close();cb()};$("askno").onclick=function(){d.close()};try{d.showModal()}catch(e){if(window.confirm(t))cb()}}
 function del(id){ask("¿Eliminar este informe y sus fotos? No se puede deshacer.",function(){data=data.filter(function(x){return x.id!==id});delete cache[id];delF(id);persist();render()})}
 function filtered(){var q=$("q").value.toLowerCase(),m=$("fm").value,e=$("fe").value;
@@ -400,7 +402,7 @@ ready=true}
 var frm=$("ftitle").parentNode;["input","change","click"].forEach(function(ev){frm.addEventListener(ev,saveDraft)});
 document.addEventListener("visibilitychange",function(){if(document.hidden)saveDraftNow()});window.addEventListener("pagehide",saveDraftNow);
 function stat(ok,sv){var s=$("sv");if(!s)return;s.textContent=ok?(sv?"✓ Guardado a las "+new Date().toLocaleTimeString("es",{hour:"2-digit",minute:"2-digit"}):"✓ Almacenamiento activo en este navegador"):"⚠ Este navegador NO está guardando los datos. No uses modo privado; abre la app en Chrome o Safari.";s.style.color=ok?"var(--ok)":"#d9534f"}
-function applyMatLock(){var L=!!(LK&&!UNL);$("mats").querySelectorAll(".mat").forEach(function(r){var i=r.querySelectorAll("input"),b=r.querySelector("button");i[0].disabled=L;i[1].disabled=false;b.disabled=L});$("addmat").disabled=L;$("matnote").hidden=!L;$("rd").disabled=L;$("rh").disabled=L;$("pernote").hidden=!L}
+function applyMatLock(){var L=!UNL;$("matunl").textContent=LK?"Desbloquear con clave":"Crear clave para modificar";$("mats").querySelectorAll(".mat").forEach(function(r){var i=r.querySelectorAll("input"),b=r.querySelector("button");i[0].disabled=L;i[1].disabled=false;b.disabled=L});$("addmat").disabled=L;$("matnote").hidden=!L;$("rd").disabled=L;$("rh").disabled=L;$("pernote").hidden=!L}
 function reconcile(){try{if(cache.__per&&!localStorage.getItem("reparaciones_per")){$("rd").value=cache.__per.d||"";$("rh").value=cache.__per.h||""}}catch(e){}if(!BAR&&cache.__barrio){BAR=cache.__barrio;$("barrio").value=BAR;drawBar()}var tk0=null;try{tk0=localStorage.getItem(TK)}catch(e){}if(cache.__tpl&&!tk0){TPL=cache.__tpl;resetForm()}var t=0;try{t=+localStorage.getItem(KEY+"_t")||0}catch(e){}var o=cache.__data;if(o&&o.t>t){try{data=JSON.parse(o.j);try{localStorage.setItem(KEY,o.j);localStorage.setItem(KEY+"_t",String(o.t))}catch(e){}}catch(e){}}
 if(!LK&&cache.__lock){LK=cache.__lock;try{localStorage.setItem(LKEY,JSON.stringify(LK))}catch(e){}}else if(LK&&!cache.__lock)putF("__lock",LK);
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});
@@ -413,7 +415,7 @@ try{BAR=localStorage.getItem(BK)||""}catch(e){}
 function drawBar(){$("h1b").textContent=BAR?": "+BAR.toUpperCase():"";document.title="Control de reparaciones de viviendas"+(BAR?" - "+BAR:"")}
 $("barrio").value=BAR;drawBar();
 $("barrio").oninput=function(){BAR=this.value.trim();try{localStorage.setItem(BK,BAR)}catch(e){}putF("__barrio",BAR);drawBar()};
-$("matunl").onclick=function(){openPw("unlock")};
+$("matunl").onclick=function(){openPw(LK?"unlock":"create")};
 var VN={nuevo:"Nuevo informe",mats:"Materiales entregados",fotos:"Fotos",lista:"Informes guardados",resp:"Respaldo",inf:"Informe para entregar"};
 function show(v){stepUI();var fm=(v==="nuevo"||v==="mats"||v==="fotos");
 $("home").hidden=v!=="home";$("backbar").hidden=v==="home";$("vname").textContent=VN[v]||"";
