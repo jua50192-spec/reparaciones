@@ -118,7 +118,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <div><label for="nombre">Nombre del beneficiario <span class="req">*</span></label><input id="nombre" placeholder="Ej. María Pérez"></div>
 <div><label for="tel">Teléfono <span class="req">*</span></label><input id="tel" inputmode="numeric" placeholder="000-000-0000" maxlength="12" autocomplete="off"></div>
 <div><label for="ced">Cédula (número) <span class="req">*</span></label><input id="ced" inputmode="numeric" placeholder="000-0000000-0" maxlength="13" autocomplete="off"></div>
-<div><label for="sector">Sector / dirección <span class="req">*</span></label><input id="sector"></div>
+<div><label for="sector">Calle y número de casa <span class="req">*</span></label><input id="sector" placeholder="Ej. Calle Primera #142" autocomplete="off"></div>
 <div><label for="tipo">Tipo de reparación</label>
 <select id="tipo"><option>Techo</option><option>Paredes</option><option>Piso</option><option>Puertas y ventanas</option><option>Baño / letrina</option><option>Instalación eléctrica</option><option>Otra</option></select></div>
 <div hidden><label for="estado">Estado</label>
@@ -145,7 +145,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <section class="card" id="v-lista" hidden>
 <h2>Informes guardados</h2>
 <div class="tools">
-<input id="q" placeholder="Buscar por nombre o sector" aria-label="Buscar">
+<input id="q" placeholder="Buscar por nombre o calle" aria-label="Buscar">
 <select id="fm" aria-label="Filtrar por mes"></select>
 <select id="fe" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option>Pendiente</option><option>Terminada</option></select>
 </div>
@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 18-oct-2026 (7)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 18-oct-2026 (8)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -242,7 +242,7 @@ $("ced").addEventListener("input",function(){this.value=fmtCed(this.value)});
 $("tel").addEventListener("input",function(){this.value=fmtTel(this.value)});
 ["nombre","tel","ced","sector"].forEach(function(i){$(i).addEventListener("input",function(){this.style.borderColor=""})});
 $("save").onclick=function(){var nombre=$("nombre").value.trim();
-var RQ=[["nombre","el nombre del beneficiario"],["tel","el teléfono"],["ced","el número de cédula"],["sector","el sector / dirección"]],miss=[];
+var RQ=[["nombre","el nombre del beneficiario"],["tel","el teléfono"],["ced","el número de cédula"],["sector","la calle y el número de casa"]],miss=[];
 RQ.forEach(function(q){var el=$(q[0]),bad=!el.value.trim();el.style.borderColor=bad?"#c0392b":"";if(bad)miss.push(q)});
 var cd=$("ced").value.replace(/\D/g,""),tl=$("tel").value.replace(/\D/g,"");
 if(cd&&cd.length!==11){miss.push(["ced","la cédula completa (000-0000000-0: 11 números)"]);$("ced").style.borderColor="#c0392b"}
@@ -303,7 +303,7 @@ h+='<h2>Detalle por vivienda</h2>';
 r.forEach(function(d){var f=cache[d.id]||{},p="";
 [["antes","Antes"],["despues","Después"]].forEach(function(s){if(inf&&f[s[0]])p+='<figure><img src="'+f[s[0]]+'" alt="'+s[1]+'"><figcaption>'+s[1]+'</figcaption></figure>'});
 if(ic)[["ced","Cédula (frente)"],["cedt","Cédula (trasera)"]].forEach(function(s){p+=f[s[0]]?'<figure><img src="'+f[s[0]]+'" alt="'+s[1]+'"><figcaption>'+s[1]+'</figcaption></figure>':'<figure><figcaption>Sin foto: '+s[1]+'</figcaption></figure>'});
-h+='<details class="rv"'+(op?' open':'')+'><summary style="cursor:pointer;font-weight:700;font-size:1.05rem">'+esc(d.nombre)+' <span style="font-weight:400;font-size:.9rem">· '+esc(fd(d.fecha))+'</span></summary><div style="margin-top:6px">'+esc(fd(d.fecha))+' · Barrio: '+esc(d.barrio||BAR)+' · '+esc(d.sector)+' · '+esc(d.tipo)+' · '+esc(d.estado)+'</div>'+(ic&&(d.ced||d.tel)?'<div>'+(d.ced?'Cédula: '+esc(d.ced):'')+(d.ced&&d.tel?' &nbsp;&nbsp;&nbsp; ':'')+(d.tel?'Teléfono: '+esc(d.tel):'')+'</div>':"")+(d.notas?'<div>Notas: '+esc(d.notas)+'</div>':"")+'<h4 style="margin:8px 0 4px">Materiales entregados</h4>'+(d.mats.length?'<table class="rt"><tr><th>Material</th><th>Cantidad</th></tr>'+d.mats.map(function(m){return'<tr><td>'+esc(m.n)+'</td><td>'+m.q+' '+un(m.n)+'</td></tr>'}).join("")+'</table>':'<div>Sin materiales registrados.</div>')+(p?'<div class="rph">'+p+'</div>':"")+'</details>'});
+h+='<details class="rv"'+(op?' open':'')+'><summary style="cursor:pointer;font-weight:700;font-size:1.05rem">'+esc(d.nombre)+' <span style="font-weight:400;font-size:.9rem">· '+esc(fd(d.fecha))+'</span></summary><div style="margin-top:6px">'+esc(fd(d.fecha))+' · Barrio: '+esc(d.barrio||BAR)+' · Dirección: '+esc(d.sector)+' · '+esc(d.tipo)+' · '+esc(d.estado)+'</div>'+(ic&&(d.ced||d.tel)?'<div>'+(d.ced?'Cédula: '+esc(d.ced):'')+(d.ced&&d.tel?' &nbsp;&nbsp;&nbsp; ':'')+(d.tel?'Teléfono: '+esc(d.tel):'')+'</div>':"")+(d.notas?'<div>Notas: '+esc(d.notas)+'</div>':"")+'<h4 style="margin:8px 0 4px">Materiales entregados</h4>'+(d.mats.length?'<table class="rt"><tr><th>Material</th><th>Cantidad</th></tr>'+d.mats.map(function(m){return'<tr><td>'+esc(m.n)+'</td><td>'+m.q+' '+un(m.n)+'</td></tr>'}).join("")+'</table>':'<div>Sin materiales registrados.</div>')+(p?'<div class="rph">'+p+'</div>':"")+'</details>'});
 return h+'</div>'}
 function who(){var n=($("rn").value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-+|-+$/g,"");return n?n+"-":""}
 function readTxt(f){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.onerror=function(){res(null)};fr.readAsText(f)})}
@@ -326,7 +326,7 @@ function need(h){if(y+h>H-M){doc.addPage();y=M}}
 function tx(t,sz,b,gap,x,w){doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(sz);doc.splitTextToSize(String(t),w||CW).forEach(function(l){need(sz*.45);doc.text(l,x==null?M:x,y+sz*.35);y+=sz*.45});y+=gap||0}
 function matTable(sm){if(sm.length){var c1=60,c2=24;doc.setDrawColor(110);doc.setLineWidth(.2);doc.setFont("helvetica","normal");doc.setFontSize(11);sm.forEach(function(m){var ls=doc.splitTextToSize(String(m.n),c1-4),rh=Math.max(5.6,ls.length*4.6+1.4);need(rh);doc.rect(M,y,c1,rh);doc.rect(M+c1,y,c2,rh);var by=y+(rh-ls.length*4.6)/2+3.3;ls.forEach(function(l,i){doc.text(l,M+2,by+i*4.6)});doc.text(String(m.q)+" "+un(m.n),M+c1+c2/2,y+rh/2+1.4,{align:"center"});y+=rh});y+=1}else tx("Sin materiales registrados.",11,0,0)}
 function detail(d,x,w){var yh=y;tx("Detalle por vivienda",14,1,1,x,w);doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text(fd(d.fecha),x+doc.getTextWidth("Detalle por vivienda")+6,yh+14*.35);
-tx("Nombre: "+d.nombre,11,1,0,x,w);if(ic&&d.ced)tx("Cédula: "+d.ced,11,0,0,x,w);if(ic&&d.tel)tx("Teléfono: "+d.tel,11,0,0,x,w);tx("Dirección: "+d.sector+" - "+d.tipo+" - "+d.estado,10,0,0,x,w);if(d.notas)tx("Notas: "+d.notas,10,0,0,x,w)}
+tx("Nombre: "+d.nombre,11,1,0,x,w);if(ic&&d.ced)tx("Cédula: "+d.ced,11,0,0,x,w);if(ic&&d.tel)tx("Teléfono: "+d.tel,11,0,0,x,w);tx("Dirección: "+d.sector,11,0,0,x,w);tx("Reparación: "+d.tipo,11,0,0,x,w);tx("Estado: "+d.estado,11,0,0,x,w);if(d.notas)tx("Notas: "+d.notas,10,0,0,x,w)}
 function buildIts(f,inf,ic,id){var g=function(k){return f[k]?(CROP[id+k]||f[k]):null};var a=[];if(inf){if(f.antes)a.push(["Antes",g("antes")]);if(f.despues)a.push(["Después",g("despues")])}if(ic){a.push(["Cédula (frente)",g("ced")]);a.push(["Cédula (trasera)",g("cedt")])}return a}
 function plan(its,avail){var n=its.length,best={score:0};if(!n)return best;
 [n,Math.ceil(n/2)].forEach(function(cols){var cw=(CW-(cols-1)*4)/cols,rows=[],sumH=0;
