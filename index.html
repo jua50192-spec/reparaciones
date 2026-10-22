@@ -45,7 +45,7 @@ th{color:var(--mute);font-weight:600}
 textarea.out{height:120px;margin-top:10px;display:none}
 .ph{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .slot{border:1px solid var(--line);border-radius:4px;padding:10px;background:var(--bg)}
-.slot img{width:100%;height:150px;object-fit:cover;border-radius:4px;cursor:zoom-in;display:block}
+.slot img{width:100%;height:150px;object-fit:cover;border-radius:4px;cursor:zoom-in;display:block}.slot img.cedimg{height:auto;aspect-ratio:85.6/53.98}.camov{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column}.camov video{flex:1;width:100%;min-height:0;object-fit:cover;display:block}.camov .camprev{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}.camfr{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:88%;max-width:560px;aspect-ratio:85.6/53.98;border:2px dashed rgba(255,255,255,.8);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);pointer-events:none}.camfr i{position:absolute;width:26px;height:26px;border:5px solid #3ddc84}.camfr i:nth-child(1){left:-5px;top:-5px;border-right:0;border-bottom:0;border-top-left-radius:10px}.camfr i:nth-child(2){right:-5px;top:-5px;border-left:0;border-bottom:0;border-top-right-radius:10px}.camfr i:nth-child(3){left:-5px;bottom:-5px;border-right:0;border-top:0;border-bottom-left-radius:10px}.camfr i:nth-child(4){right:-5px;bottom:-5px;border-left:0;border-top:0;border-bottom-right-radius:10px}.camfr[hidden],.camov [hidden]{display:none!important}.camtx{position:absolute;left:0;right:0;top:calc(42% + 31vw);margin:0;padding:10px 16px;color:#fff;text-align:center;font-size:1rem;text-shadow:0 1px 3px #000}.cambar{display:flex;gap:10px;justify-content:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#000}.cambar button{font-size:1.05rem;padding:12px 18px}
 .nof{height:150px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:4px;color:var(--mute)}
 label.btn{position:relative;display:inline-block;margin:0;padding:9px 14px;border:1px solid var(--main);border-radius:4px;color:var(--main);background:var(--card);cursor:pointer;font-size:.95rem}
 label.btn input{position:absolute;opacity:0;width:1px;height:1px}
@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (12)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (13)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -211,11 +211,37 @@ function u2b(u){var p=u.split(","),bin=atob(p[1]),a=new Uint8Array(bin.length);f
 function verCed(u){return getSample().then(function(s){
 if(!s)return{ok:true}/* versión independiente: sin verificación automática */;
 return s.json("Mira la imagen y decide SOLO si muestra una cédula de identidad (la tarjeta oficial de identificación personal, por el frente o por la parte de atrás). No leas ni transcribas ningún dato personal. Si muestra cualquier otra cosa (una habitación, una persona, un objeto, una pantalla, otro tipo de documento, o una foto tan borrosa u oscura que no se pueda ver que es una cédula), es_cedula es false. Responde solo con un objeto JSON con las claves es_cedula (true o false) y motivo (máximo 8 palabras).",{images:u2b(u),modelTier:"quick"}).then(function(r){return r&&r.es_cedula===true?{ok:true}:{ok:false,msg:"Esta foto no parece una cédula"+(r&&r.motivo?" ("+String(r.motivo).slice(0,60)+")":"")+". Toma una foto de la cédula."}},function(e){var c=e&&e.code,m="No se pudo verificar la foto. Intenta de nuevo.";if(c==="not_granted")m="Para guardar la cédula debes permitir que Claude revise la foto. Recarga la página y toca Permitir.";else if(c==="rate_limited")m="Demasiadas verificaciones seguidas. Espera un momento e intenta otra vez.";else if(c==="image_rejected")m="No se pudo leer la foto. Toma otra.";else if(c==="images_unavailable")m="La verificación de fotos no está disponible en este navegador.";return{ok:false,msg:m}})})}
-function drawSlots(){var h="";SL.forEach(function(s){var k=s[0],has=!!fot[k];h+='<div class="slot"><b>'+s[1]+(k==="despues"?"":' <span class="req">*</span>')+'</b>'+(has?'<img src="'+fot[k]+'" alt="'+s[1]+'">':'<div class="nof">Sin foto</div>')+'<div class="row" style="margin-top:6px"><label class="btn">Tomar foto<input type="file" accept="image/*" capture="environment" data-k="'+k+'"></label><label class="btn">Galería<input type="file" accept="image/*" data-k="'+k+'"></label>'+(has?'<button type="button" class="x" style="padding:9px 10px" data-r="'+k+'">Quitar</button>':'')+'</div>'+(smsg[k]?'<p style="margin:6px 0 0;font-size:.9rem;color:'+(smsg[k].bad?'#d9534f':'var(--mute)')+'" role="alert">'+esc(smsg[k].t)+'</p>':'')+'</div>'});
-$("ph").innerHTML=h;
-$("ph").querySelectorAll("input[type=file]").forEach(function(i){i.onchange=function(){var k=i.dataset.k,fl=i.files[0];i.value="";if(!fl||busy[k])return;shrink(fl,function(u){if(k!=="ced"&&k!=="cedt"){delete smsg[k];fot[k]=u;drawSlots();return}
+function usarFoto(k,u){if(k!=="ced"&&k!=="cedt"){delete smsg[k];fot[k]=u;drawSlots();return}
 busy[k]=1;smsg[k]={t:"Verificando que sea una cédula..."};drawSlots();
-verCed(u).then(function(r){busy[k]=0;if(r.ok){delete smsg[k];fot[k]=u}else smsg[k]={t:r.msg,bad:1};drawSlots()})})}});
+verCed(u).then(function(r){busy[k]=0;if(r.ok){delete smsg[k];fot[k]=u}else smsg[k]={t:r.msg,bad:1};drawSlots()})}
+/* Cámara con guía del tamaño de la cédula (85.6 x 53.98 mm): solo se guarda lo que queda dentro del recuadro */
+var CAM_R=85.6/53.98;
+function camNativa(k){var i=document.querySelector('#ph input[data-nat][data-k="'+k+'"]');if(i)i.click()}
+function camCed(k){var md=navigator.mediaDevices;if(!md||!md.getUserMedia){camNativa(k);return}
+var ov=document.createElement("div");ov.className="camov";
+ov.innerHTML='<video playsinline autoplay muted></video><div class="camfr"><i></i><i></i><i></i><i></i></div>'+
+'<p class="camtx">Pon la cédula <b>dentro del recuadro</b>, que llene el marco sin salirse. Buena luz y sin reflejos.</p>'+
+'<img class="camprev" alt="Foto de la cédula" hidden>'+
+'<div class="cambar"><button type="button" class="x" data-a="no">Cancelar</button><button type="button" class="p camshot" data-a="si">📷 Tomar foto</button>'+
+'<button type="button" class="x" data-a="rep" hidden>Repetir</button><button type="button" class="p" data-a="ok" hidden>Usar esta foto ✓</button></div>';
+document.body.appendChild(ov);var v=ov.querySelector("video"),fr=ov.querySelector(".camfr"),pv=ov.querySelector(".camprev"),st=null,url=null;
+function btn(a){return ov.querySelector('[data-a="'+a+'"]')}
+function cerrar(){if(st)st.getTracks().forEach(function(t){t.stop()});ov.remove()}
+function modo(prev){pv.hidden=!prev;v.hidden=prev;fr.hidden=prev;ov.querySelector(".camtx").innerHTML=prev?"¿Se lee bien la cédula? Si está borrosa o cortada, toca <b>Repetir</b>.":'Pon la cédula <b>dentro del recuadro</b>, que llene el marco sin salirse. Buena luz y sin reflejos.';btn("si").hidden=prev;btn("rep").hidden=!prev;btn("ok").hidden=!prev}
+md.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false}).then(function(s){st=s;v.srcObject=s;var p=v.play();if(p&&p.catch)p.catch(function(){})},function(){cerrar();camNativa(k)});
+btn("no").onclick=cerrar;
+btn("si").onclick=function(){var vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return;
+var er=v.getBoundingClientRect(),r=fr.getBoundingClientRect(),sc=Math.max(er.width/vw,er.height/vh),ox=(er.width-vw*sc)/2,oy=(er.height-vh*sc)/2;
+var sx=(r.left-er.left-ox)/sc,sy=(r.top-er.top-oy)/sc,sw=r.width/sc,sh=r.height/sc;
+sx=Math.max(0,sx);sy=Math.max(0,sy);sw=Math.min(sw,vw-sx);sh=Math.min(sh,vh-sy);
+var W=Math.min(1000,Math.round(sw)),c=document.createElement("canvas");c.width=W;c.height=Math.round(W/CAM_R);
+c.getContext("2d").drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);url=c.toDataURL("image/jpeg",.85);pv.src=url;modo(true)};
+btn("rep").onclick=function(){url=null;modo(false)};
+btn("ok").onclick=function(){var u=url;cerrar();if(u)usarFoto(k,u)}}
+function drawSlots(){var h="";SL.forEach(function(s){var k=s[0],has=!!fot[k];h+='<div class="slot"><b>'+s[1]+(k==="despues"?"":' <span class="req">*</span>')+'</b>'+(has?'<img src="'+fot[k]+'" alt="'+s[1]+'"'+(k==="ced"||k==="cedt"?' class="cedimg"':'')+'>':'<div class="nof">Sin foto</div>')+'<div class="row" style="margin-top:6px">'+(k==="ced"||k==="cedt"?'<button type="button" class="btn" data-cam="'+k+'">Tomar foto</button>':'')+'<label class="btn"'+(k==="ced"||k==="cedt"?' hidden':'')+'>Tomar foto<input type="file" accept="image/*" capture="environment" data-k="'+k+'"'+(k==="ced"||k==="cedt"?' data-nat="1" hidden':'')+'></label><label class="btn">Galería<input type="file" accept="image/*" data-k="'+k+'"></label>'+(has?'<button type="button" class="x" style="padding:9px 10px" data-r="'+k+'">Quitar</button>':'')+'</div>'+(smsg[k]?'<p style="margin:6px 0 0;font-size:.9rem;color:'+(smsg[k].bad?'#d9534f':'var(--mute)')+'" role="alert">'+esc(smsg[k].t)+'</p>':'')+'</div>'});
+$("ph").innerHTML=h;
+$("ph").querySelectorAll("input[type=file]").forEach(function(i){i.onchange=function(){var k=i.dataset.k,fl=i.files[0];i.value="";if(!fl||busy[k])return;shrink(fl,function(u){usarFoto(k,u)})}});
+$("ph").querySelectorAll("[data-cam]").forEach(function(b){b.onclick=function(){var k=b.dataset.cam;if(busy[k])return;camCed(k)}});
 $("ph").querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){delete fot[b.dataset.r];delete smsg[b.dataset.r];drawSlots()}});
 $("ph").querySelectorAll(".slot img").forEach(function(i){i.onclick=function(){big(i.src)}});saveDraft()}
 $("closed").onclick=function(){$("dlg").close()};
