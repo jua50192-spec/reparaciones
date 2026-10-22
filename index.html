@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (17)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (19)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -218,12 +218,28 @@ function cargarFD(){if(FD)return Promise.resolve(FD);if(!FDp){FDp=import(MPV+"/v
 var MSG_FRENTE="Esta foto NO es el FRENTE de la cédula. El frente es el lado con la FOTO GRANDE de la persona, a la izquierda. Voltea la cédula, ponla derecha y con buena luz, y toma la foto otra vez.";
 var MSG_ATRAS="Esta foto es el FRENTE de la cédula. Aquí va la PARTE DE ATRÁS (el lado sin la foto grande). Voltea la cédula y toma la foto otra vez.";
 var MSG_REVES="La cédula está al revés. Ponla derecha, con la foto grande a la IZQUIERDA, y toma la foto otra vez.";
-function ladoCed(k,u){return cargarFD().then(function(fd){return new Promise(function(res){var im=new Image();im.onload=function(){var r=null;try{r=fd.detect(im)}catch(e){res({unk:1});return}
-var W=im.naturalWidth||im.width,big=null;((r&&r.detections)||[]).forEach(function(d){var b=d.boundingBox||d.bounding_box;if(!b)return;var bw=b.width,bx=(b.originX!=null?b.originX:b.origin_x)||0;if(bw/W>=.15&&(!big||bw>big.w))big={w:bw,cx:(bx+bw/2)/W}});
-if(k==="ced"){if(!big)res({ok:false,msg:MSG_FRENTE});else if(big.cx>.55)res({ok:false,msg:MSG_REVES});else res({ok:true})}else res(big?{ok:false,msg:MSG_ATRAS}:{ok:true})};
-im.onerror=function(){res({unk:1})};im.src=u})},function(){return{unk:1}})}
+var MSG_NOATRAS="No se reconoce la PARTE DE ATRÁS de la cédula. Atrás tiene un CÓDIGO QR arriba y 3 líneas de letras abajo. Acércala para que llene el recuadro, con buena luz y sin reflejos, y toma la foto otra vez.";
+function cargarImg(u){return new Promise(function(res,rej){var im=new Image();im.onload=function(){res(im)};im.onerror=rej;im.src=u})}
+/* La foto grande de la persona (solo en el frente). Devuelve {cx} o null; undefined si no se pudo revisar */
+function caraGrande(im){return cargarFD().then(function(fd){var r;try{r=fd.detect(im)}catch(e){return undefined}var W=im.naturalWidth||im.width,big=null;
+((r&&r.detections)||[]).forEach(function(d){var b=d.boundingBox||d.bounding_box;if(!b)return;var bw=b.width,bx=(b.originX!=null?b.originX:b.origin_x)||0;if(bw/W>=.15&&(!big||bw>big.w))big={w:bw,cx:(bx+bw/2)/W}});return big},function(){return undefined})}
+/* Código QR (solo en la parte de atrás, en los dos modelos). true / false, o null si no se pudo revisar */
+var QRp=null;
+function cargarScript(src){return new Promise(function(res,rej){var sc=document.createElement("script");sc.src=src;sc.onload=res;sc.onerror=function(){sc.remove();rej()};document.head.appendChild(sc)})}
+function cargarQR(){if(window.jsQR)return Promise.resolve(window.jsQR);if(!QRp)QRp=cargarScript("jsQR.js").catch(function(){return cargarScript("https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js")}).then(function(){if(!window.jsQR)throw 0;return window.jsQR},function(e){QRp=null;throw e});return QRp}
+function qrJS(jq,im){function prueba(sx,sy,sw,sh,esc){var w=Math.round(sw*esc),h=Math.round(sh*esc),c=document.createElement("canvas");c.width=w;c.height=h;var g=c.getContext("2d");g.drawImage(im,sx,sy,sw,sh,0,0,w,h);var d=g.getImageData(0,0,w,h);return !!jq(d.data,w,h,{inversionAttempts:"attemptBoth"})}
+var W=im.naturalWidth||im.width,H=im.naturalHeight||im.height,e=Math.min(1,1200/W);
+if(prueba(0,0,W,H,e))return true;
+return prueba(W*.2,0,W*.6,H*.6,Math.min(3,1400/(W*.6)))}
+function hayQR(im){var p=Promise.resolve(null);
+if(window.BarcodeDetector&&BarcodeDetector.getSupportedFormats)p=BarcodeDetector.getSupportedFormats().then(function(f){if(f.indexOf("qr_code")<0)return null;return new BarcodeDetector({formats:["qr_code"]}).detect(im).then(function(b){return b.length>0})}).catch(function(){return null});
+return p.then(function(r){if(r===true)return true;return cargarQR().then(function(jq){try{return qrJS(jq,im)}catch(e){return r}},function(){return r})})}
+function ladoCed(k,u){return cargarImg(u).then(function(im){return caraGrande(im).then(function(big){
+if(k==="ced"){if(big===undefined)return{unk:1};if(!big)return{ok:false,msg:MSG_FRENTE};if(big.cx>.55)return{ok:false,msg:MSG_REVES};return{ok:true}}
+if(big)return{ok:false,msg:MSG_ATRAS};
+return hayQR(im).then(function(q){if(q===null)return{unk:1};return q?{ok:true}:{ok:false,msg:MSG_NOATRAS}})})},function(){return{unk:1}})}
 function preguntaLado(k){return k==="ced"?"No se pudo revisar el lado automáticamente (la primera vez necesita internet). ¿Esta foto es el FRENTE de la cédula, el lado con la foto grande?":"No se pudo revisar el lado automáticamente (la primera vez necesita internet). ¿Esta foto es la PARTE DE ATRÁS de la cédula, el lado sin la foto grande?"}
-setTimeout(function(){if(navigator.onLine!==false)cargarFD().catch(function(){})},4000);
+setTimeout(function(){if(navigator.onLine!==false){cargarFD().catch(function(){});cargarQR().catch(function(){})}},4000);
 function usarFoto(k,u,rev){if(k!=="ced"&&k!=="cedt"){delete smsg[k];fot[k]=u;drawSlots();return}
 if(!rev){busy[k]=1;smsg[k]={t:"Revisando el lado de la cédula..."};drawSlots();ladoCed(k,u).then(function(r){busy[k]=0;
 if(r.unk){delete smsg[k];drawSlots();ask(preguntaLado(k),function(){usarFoto(k,u,1)},"SÍ","NO");return}
@@ -240,7 +256,7 @@ ov.innerHTML='<video playsinline autoplay muted></video><div class="camfr"><i></
 '<img class="camprev" alt="Foto de la cédula" hidden>'+
 '<div class="cambar"><button type="button" class="x" data-a="no">Cancelar</button><button type="button" class="p camshot" data-a="si">📷 Tomar foto</button>'+
 '<button type="button" class="x" data-a="rep" hidden>Repetir</button><button type="button" class="p" data-a="ok" hidden>Usar esta foto ✓</button></div>';
-document.body.appendChild(ov);var LADO=0,NOK=0;var tt=document.createElement("div");tt.className="camtit";tt.textContent=k==="ced"?"CÉDULA · FRENTE (lado con la foto grande)":"CÉDULA · PARTE DE ATRÁS";ov.appendChild(tt);var v=ov.querySelector("video"),fr=ov.querySelector(".camfr"),pv=ov.querySelector(".camprev"),st=null,url=null;
+document.body.appendChild(ov);var LADO=0,NOK=0;var tt=document.createElement("div");tt.className="camtit";tt.textContent=k==="ced"?"CÉDULA · FRENTE (lado con la foto grande)":"CÉDULA · PARTE DE ATRÁS (lado con el código QR)";ov.appendChild(tt);var v=ov.querySelector("video"),fr=ov.querySelector(".camfr"),pv=ov.querySelector(".camprev"),st=null,url=null;
 function btn(a){return ov.querySelector('[data-a="'+a+'"]')}
 function cerrar(){if(st)st.getTracks().forEach(function(t){t.stop()});ov.remove()}
 function modo(prev){pv.hidden=!prev;v.hidden=prev;fr.hidden=prev;ov.querySelector(".camtx").innerHTML=prev?"¿Se lee bien la cédula? Si está borrosa o cortada, toca <b>Repetir</b>.":'Pon la cédula <b>dentro del recuadro</b>, que llene el marco sin salirse. Buena luz y sin reflejos.';btn("si").hidden=prev;btn("rep").hidden=!prev;btn("ok").hidden=!prev}
@@ -336,7 +352,10 @@ function fillDL(){var s={};BASE.forEach(function(b){s[b]=1});data.forEach(functi
 function clrF(){if(db)try{db.transaction("f","readwrite").objectStore("f").clear()}catch(e){}}
 var DIRH=null;function dirH(){return DIRH||cache.__dir||null}
 function aCarpeta(name,d){var h=dirH();return h.getFileHandle(name,{create:true}).then(function(fh){return fh.createWritable()}).then(function(w){var b=(d instanceof Blob)?d:new Blob([d]);return w.write(b).then(function(){return w.close()})})}
-function guardar(name,d){if(dirH()&&window.showDirectoryPicker){aCarpeta(name,d).then(function(){avisoC("✓ Guardado en la carpeta «"+dirH().name+"»: "+name)},function(){avisoC("No se pudo guardar en la carpeta. Se descarga normal.");guardarDL(name,d)});return}guardarDL(name,d)}
+var NAT=window.AndroidApp||null;
+function aB64(d){return new Promise(function(res,rej){var b=(d instanceof Blob)?d:new Blob([d]);var fr=new FileReader();fr.onload=function(){res(String(fr.result).split(",")[1]||"")};fr.onerror=rej;fr.readAsDataURL(b)})}
+function guardar(name,d){if(NAT){var mt=/\.pdf$/i.test(name)?"application/pdf":/\.json$/i.test(name)?"application/json":"application/octet-stream";aB64(d).then(function(b){var r=NAT.guardar(name,b,mt);if(r==="ok")avisoC("✓ Guardado en Descargas › Reparaciones: "+name);else alert("No se pudo guardar el archivo: "+r)},function(){alert("No se pudo preparar el archivo.")});return}
+if(dirH()&&window.showDirectoryPicker){aCarpeta(name,d).then(function(){avisoC("✓ Guardado en la carpeta «"+dirH().name+"»: "+name)},function(){avisoC("No se pudo guardar en la carpeta. Se descarga normal.");guardarDL(name,d)});return}guardarDL(name,d)}
 function avisoC(t){var e=$("cdirt");if(e)e.textContent=t;else alert(t)}
 function guardarDL(name,d){if(!DLC){alert("La descarga no está disponible aquí. Usa «Copiar datos».");return}DLC.save({filename:name,data:d}).then(function(){},function(e){if(!e||e.code!=="declined")alert("No se pudo guardar el archivo.")})}
 var REPCSS=".rh{font-family:Barlow,Arial,sans-serif}.rh h1{margin:0 0 4px}.rs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.rs div{border:1px solid #9aa;padding:6px 12px;border-radius:4px}.rs b{font-size:1.4rem;display:block}.rv{border:1px solid #9aa;border-radius:4px;padding:10px;margin:10px 0;break-inside:avoid}.rv h3{margin:0 0 4px}.rph{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.rph figure{margin:0;width:48%}.rph img{width:100%;height:auto;max-height:320px;object-fit:contain;border-radius:3px}.rph figcaption{font-size:.8rem}.rph figure.ced{width:85.6mm;max-width:48%}.rph figure.ced img{width:85.6mm;max-width:100%;height:auto;aspect-ratio:85.6/53.98;max-height:none;object-fit:cover}@media print{.rph figure.ced{max-width:none}}.rt{width:100%;min-width:0;border-collapse:collapse}.rt td,.rt th{border:1px solid #9aa;padding:4px 8px}";
@@ -349,7 +368,7 @@ var DLH_K="reparaciones_descargados";
 /* Permiso de la carpeta (se pide al tocar un botón) */
 function conCarpeta(fn){var h=dirH();if(!h||!window.showDirectoryPicker||!h.queryPermission)return fn();
 h.queryPermission({mode:"readwrite"}).then(function(p){if(p==="granted")return fn();return h.requestPermission({mode:"readwrite"}).then(function(p2){if(p2!=="granted"){DIRH=null;delete cache.__dir}fn()})},function(){fn()})}
-function existeEnCarpeta(name){var h=dirH();if(!h)return Promise.resolve(null);return h.getFileHandle(name).then(function(){return true},function(){return false})}
+function existeEnCarpeta(name){if(window.AndroidApp)return Promise.resolve(!!window.AndroidApp.existe(name));var h=dirH();if(!h)return Promise.resolve(null);return h.getFileHandle(name).then(function(){return true},function(){return false})}
 function pdfPreg(id){var d=data.filter(function(x){return x.id===id})[0];if(!d)return;var key=cedLimpia(d)||("id:"+d.id),H={};try{H=JSON.parse(localStorage.getItem(DLH_K)||"{}")}catch(e){}
 function go(){pdfUno(id,function(){H[key]=today();try{localStorage.setItem(DLH_K,JSON.stringify(H))}catch(e){}})}
 conCarpeta(function(){existeEnCarpeta(nomPDF(d)).then(function(ex){var ya=ex===null?!!H[key]:ex;if(ya)ask("Ya existe el archivo "+nomPDF(d)+(H[key]?" (descargado el "+fd(H[key])+")":"")+". ¿Desea reemplazarlo?",go,"SÍ","NO");else go()})})}
@@ -538,18 +557,18 @@ h+='</div>'});
 z.innerHTML=h;var PX=96/25.4;
 z.querySelectorAll(".pg").forEach(function(pg){var top=pg.querySelector(".pt").getBoundingClientRect().height/PX,hasCed=!!pg.querySelector(".fced")||ic,ced=hasCed?(4.5+53.98+4):0;
 var hc=Math.min(93.25/.9,254-3-top-ced-4.5-4);if(hc<40)hc=40;pg.querySelectorAll(".fcasa").forEach(function(im){im.style.height=hc+"mm";im.style.width=(hc*.9)+"mm"})});
-var ims=Array.prototype.slice.call(z.querySelectorAll("img"));Promise.all(ims.map(function(i){return i.decode?i.decode().catch(function(){}):0})).then(function(){document.body.classList.add("imprimiendo");setTimeout(function(){try{window.print()}catch(e){alert("Este teléfono no permite imprimir desde aquí. Descarga el PDF e imprímelo desde Descargas.")}},50)})}
+var ims=Array.prototype.slice.call(z.querySelectorAll("img"));Promise.all(ims.map(function(i){return i.decode?i.decode().catch(function(){}):0})).then(function(){document.body.classList.add("imprimiendo");setTimeout(function(){if(window.AndroidApp){window.AndroidApp.imprimir("Informe de reparaciones");return}try{window.print()}catch(e){alert("Este teléfono no permite imprimir desde aquí. Descarga el PDF e imprímelo desde Descargas.")}},50)})}
 window.addEventListener("afterprint",function(){document.body.classList.remove("imprimiendo")});
 $("rimp").onclick=function(){imprimir(data)};
 $("pimp").onclick=function(){var ids=Object.keys(PS).filter(function(k){return PS[k]});if(!ids.length){alert("Marca al menos un informe.");return}imprimir(data.filter(function(d){return PS[d.id]}))};
-$("vmi").onchange=function(){var f=this.files[0];this.value="";if(!f)return;
+$("vmi").onclick=function(e){if(window.AndroidApp){e.preventDefault();window.AndroidApp.abrirCarpeta()}};$("vmi").onchange=function(){var f=this.files[0];this.value="";if(!f)return;
 if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:f.name}).catch(function(){})}else{var u=URL.createObjectURL(f),w=window.open(u,"_blank");if(!w)location.href=u}};
 /* Carpeta propia para los informes: solo en teléfonos que lo permiten */
-(function(){if(!window.showDirectoryPicker)return;$("cdirrow").hidden=false;
+(function(){if(window.AndroidApp){$("cdirrow").hidden=false;$("cdir").hidden=true;$("cdirt").textContent="Los informes se guardan en Descargas › Reparaciones y se reemplazan, nunca se duplican.";return}if(!window.showDirectoryPicker)return;$("cdirrow").hidden=false;
 function pinta(){var h=dirH();$("cdir").textContent=h?"📁 Cambiar carpeta":"📁 Elegir carpeta de informes";$("cdirt").textContent=h?"Los informes se guardan en «"+h.name+"» y se reemplazan, nunca se duplican.":"Elige (o crea) una carpeta «Reparaciones» para guardar los informes sin duplicarlos."}
 setTimeout(pinta,800);
 $("cdir").onclick=function(){window.showDirectoryPicker({id:"reparaciones",mode:"readwrite",startIn:"documents"}).then(function(h){DIRH=h;cache.__dir=h;putF("__dir",h);pinta()},function(){})}})();
-if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+if("serviceWorker" in navigator&&!window.AndroidApp){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 </script>
 </body>
 </html>
