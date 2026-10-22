@@ -1,6 +1,6 @@
 /* Service worker: permite abrir la app sin internet.
    Cuando publiques una versión nueva, cambia el número de VERSION. */
-var VERSION = "reparaciones-v18";
+var VERSION = "reparaciones-v19";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "jspdf.umd.min.js"];
 
 self.addEventListener("install", function (e) {
