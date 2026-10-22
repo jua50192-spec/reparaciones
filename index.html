@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (10)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (11)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -293,7 +293,7 @@ var REPCSS=".rh{font-family:Barlow,Arial,sans-serif}.rh h1{margin:0 0 4px}.rs{di
 var stl=document.createElement("style");stl.textContent=REPCSS;document.head.appendChild(stl);
 function fd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?m[3]+"/"+m[2]+"/"+m[1]:(s||"")}
 var ONLY=null;
-function pdfUno(id,done){done=done||function(){};var d=data.filter(function(x){return x.id===id})[0];if(!d){done();return}if(!DLC){alert("No se pudo crear el PDF aquí.");done();return}ONLY=d;CROP={};var jobs=[],f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],AR).then(function(c){CROP[d.id+k]=c}))});
+function pdfUno(id,done){done=done||function(){};var d=data.filter(function(x){return x.id===id})[0];if(!d){done();return}if(!DLC){alert("No se pudo crear el PDF aquí.");done();return}ONLY=d;CROP={};var jobs=[],f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],k.indexOf("ced")===0?CR:AR).then(function(c){CROP[d.id+k]=c}))});
 Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}ONLY=null;if(!b){alert("No se pudo crear el PDF.");done();return}var nm=String(d.nombre||"vivienda").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-+|-+$/g,"");guardar("informe-"+nm+"-"+today()+".pdf",b);done()})}
 var SEL=null;
 function repRows(){if(ONLY)return [ONLY];if(SEL)return data.filter(function(d){return SEL[d.id]}).sort(function(x,y){return x.fecha.localeCompare(y.fecha)});return data.slice().sort(function(x,y){return x.fecha.localeCompare(y.fecha)})}
@@ -318,7 +318,7 @@ $("bk").onclick=function(){var ph={};data.forEach(function(d){if(cache[d.id])ph[
 $("rs").onchange=function(){var inp=this,f=inp.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);if(!o.data)throw 0;ask("Se reemplazarán los informes actuales por los del respaldo ("+o.data.length+" informes). ¿Continuar?",function(){data=o.data;if(Array.isArray(o.tpl)&&o.tpl.length){TPL=o.tpl.map(String);try{localStorage.setItem(TK,JSON.stringify(TPL))}catch(e){}putF("__tpl",TPL)}if(o.barrio!=null){BAR=o.barrio;$("barrio").value=BAR;drawBar();try{localStorage.setItem(BK,BAR)}catch(e){}}if(o.per){$("rd").value=o.per.d||"";$("rh").value=o.per.h||"";savePer()}persist();cache=o.fotos||{};clrF();Object.keys(cache).forEach(function(id){putF(id,cache[id])});persist();if(LK)putF("__lock",LK);putF("__tpl",TPL);putF("__barrio",BAR);savePer();render();alert("Respaldo restaurado.")})}catch(e){alert("El archivo no es un respaldo válido.")}};fr.readAsText(f);inp.value=""};
 $("rg").onclick=function(){$("rep").innerHTML=repHTML();$("rep").scrollIntoView()};
 function un(n){return /clavo/i.test(n)?"lb":"und."}
-var CROP={},AR=.9,HMAX=64;
+var CROP={},CR=85.6/53.98,AR=.9,HMAX=64;
 function cropU(u,ar){return new Promise(function(res){var im=new Image();im.onload=function(){var w=im.width,h=im.height,cw=w,ch=h;if(w/h<ar)ch=w/ar;else cw=h*ar;var c=document.createElement("canvas");c.width=Math.round(cw);c.height=Math.round(ch);c.getContext("2d").drawImage(im,(w-cw)/2,(h-ch)/2,cw,ch,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.88))};im.onerror=function(){res(u)};im.src=u})}
 function pdfBuild(){var J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
 var doc=new J({unit:"mm",format:"letter"}),W=215.9,H=279.4,M=12.7,CW=W-2*M,y=M;
@@ -347,7 +347,7 @@ function fotosHoja(f,inf,ic,id){var g=function(k){return f[k]?(CROP[id+k]||f[k])
 var casa=[];if(inf){if(f.antes)casa.push(["Antes",g("antes")]);if(f.despues)casa.push(["Después",g("despues")])}
 var ced=ic?[["Cédula (frente)",g("ced")],["Cédula (trasera)",g("cedt")]]:[];
 if(!casa.length&&!ced.length)return;
-var GAP=4,LB=4.5,BOT=H-M-3,cw=(CW-GAP)/2,CH=ced.length?36:0,cedBlk=ced.length?LB+CH+GAP:0;
+var GAP=4,LB=4.5,BOT=H-M-3,cw=(CW-GAP)/2,CH=ced.length?53.98:0,cedBlk=ced.length?LB+CH+GAP:0;
 function altoCasa(){return Math.min(cw/AR,BOT-y-cedBlk-(casa.length?LB:0))}
 var hc=altoCasa();if(casa.length&&hc<45&&y>M+40){doc.addPage();y=M;hc=altoCasa()}
 if(casa.length){casa.forEach(function(it,k){var x=casa.length===1?M+(CW-cw)/2:M+k*(cw+GAP);fotoCaja(it,x,y,cw,hc)});y+=LB+hc+GAP}
@@ -367,7 +367,7 @@ var yT=y;tx("Materiales entregados",14,1,1,M,90);matTable(d.mats);var yL=y;y=yT;
 fotosHoja(f,inf,ic,d.id)});
 var n=doc.getNumberOfPages();for(var pg=1;pg<=n;pg++){doc.setPage(pg);doc.setFontSize(8);doc.setFont("helvetica","normal");doc.text("Página "+pg+" de "+n,W/2,H-7,{align:"center"})}
 return doc.output("blob")}
-function dlPDF(done){done=done||function(){};$("rep").innerHTML=repHTML();if(!DLC){try{window.print()}catch(e){alert("No se pudo crear el PDF aquí.")}done();return}var jobs=[];CROP={};repRows().forEach(function(d){var f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],AR).then(function(c){CROP[d.id+k]=c}))})});Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}if(!b){alert("No se pudo crear el PDF.");done();return}guardar("informe-reparaciones-"+today()+".pdf",b);done()})}
+function dlPDF(done){done=done||function(){};$("rep").innerHTML=repHTML();if(!DLC){try{window.print()}catch(e){alert("No se pudo crear el PDF aquí.")}done();return}var jobs=[];CROP={};repRows().forEach(function(d){var f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],k.indexOf("ced")===0?CR:AR).then(function(c){CROP[d.id+k]=c}))})});Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}if(!b){alert("No se pudo crear el PDF.");done();return}guardar("informe-reparaciones-"+today()+".pdf",b);done()})}
 $("rp").onclick=function(){SEL=null;dlPDF()};
 
 var PS={};
