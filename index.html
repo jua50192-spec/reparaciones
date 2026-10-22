@@ -76,7 +76,7 @@ details.fila .fn{font-weight:600;font-size:1.05rem;flex:1 1 auto}
 details.fila .fs{font-size:.85rem}
 details.fila .fb{padding:2px 4px 14px 24px;display:grid;gap:6px}
 button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
-@media print{:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--card:#fff;--ink:#000;--mute:#444;--line:#999}body{background:#fff;color:#000}.wrap>*:not(.rsec){display:none}.rsec>*:not(#rep){display:none}.rsec{border:0;padding:0}}
+@page{size:letter;margin:12mm}@media print{:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--card:#fff;--ink:#000;--mute:#444;--line:#999}body{background:#fff;color:#000}.wrap>*:not(.rsec){display:none}.rsec>*:not(#rep){display:none}.rsec{border:0;padding:0}}
 .req{color:#c0392b;font-weight:700}</style>
 <script src="jspdf.umd.min.js"></script>
 <script>if(!window.jspdf){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>')}</script>
@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 18-oct-2026 (9)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (10)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -321,7 +321,7 @@ function un(n){return /clavo/i.test(n)?"lb":"und."}
 var CROP={},AR=.9,HMAX=64;
 function cropU(u,ar){return new Promise(function(res){var im=new Image();im.onload=function(){var w=im.width,h=im.height,cw=w,ch=h;if(w/h<ar)ch=w/ar;else cw=h*ar;var c=document.createElement("canvas");c.width=Math.round(cw);c.height=Math.round(ch);c.getContext("2d").drawImage(im,(w-cw)/2,(h-ch)/2,cw,ch,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.88))};im.onerror=function(){res(u)};im.src=u})}
 function pdfBuild(){var J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
-var doc=new J({unit:"mm",format:"a4"}),W=210,H=297,M=15,CW=W-2*M,y=M;
+var doc=new J({unit:"mm",format:"letter"}),W=215.9,H=279.4,M=12.7,CW=W-2*M,y=M;
 function need(h){if(y+h>H-M){doc.addPage();y=M}}
 function tx(t,sz,b,gap,x,w){doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(sz);doc.splitTextToSize(String(t),w||CW).forEach(function(l){need(sz*.45);doc.text(l,x==null?M:x,y+sz*.35);y+=sz*.45});y+=gap||0}
 function matTable(sm){if(sm.length){var c1=60,c2=24;doc.setDrawColor(110);doc.setLineWidth(.2);doc.setFont("helvetica","normal");doc.setFontSize(11);sm.forEach(function(m){var ls=doc.splitTextToSize(String(m.n),c1-4),rh=Math.max(5.6,ls.length*4.6+1.4);need(rh);doc.rect(M,y,c1,rh);doc.rect(M+c1,y,c2,rh);var by=y+(rh-ls.length*4.6)/2+3.3;ls.forEach(function(l,i){doc.text(l,M+2,by+i*4.6)});doc.text(String(m.q)+" "+un(m.n),M+c1+c2/2,y+rh/2+1.4,{align:"center"});y+=rh});y+=1}else tx("Sin materiales registrados.",11,0,0)}
@@ -338,6 +338,20 @@ if(b.score<50&&y>M+40){doc.addPage();y=M;b=plan(its,H-M-y)}
 b.rows.forEach(function(rw){var rh=rw.rh*b.s;need(rh+9);
 rw.row.forEach(function(it,k){var x=M+k*(b.cw+4);doc.setFont("helvetica","normal");doc.setFontSize(8);
 if(it[1]){var q=doc.getImageProperties(it[1]),w=b.cw*b.s,h=w*q.height/q.width,xo=x+(b.cw-w)/2;doc.text(it[0],xo,y+3);doc.addImage(it[1],"JPEG",xo,y+4,w,h)}else doc.text(it[0]+": sin foto",x,y+3)});y+=rh+9});y+=2}
+/* Fotos grandes en una sola hoja carta: Antes/Después lo más grandes que quepan, cédulas en una fila más pequeña debajo */
+function fotoCaja(it,x,yy,bw,bh){doc.setFont("helvetica","bold");doc.setFontSize(9);
+if(!it[1]){doc.setFont("helvetica","normal");doc.text(it[0]+": sin foto",x,yy+3);return}
+var q=doc.getImageProperties(it[1]),w=bw,h=w*q.height/q.width;if(h>bh){h=bh;w=h*q.width/q.height}
+var xo=x+(bw-w)/2;doc.text(it[0],xo,yy+3);doc.addImage(it[1],"JPEG",xo,yy+4.5,w,h)}
+function fotosHoja(f,inf,ic,id){var g=function(k){return f[k]?(CROP[id+k]||f[k]):null};
+var casa=[];if(inf){if(f.antes)casa.push(["Antes",g("antes")]);if(f.despues)casa.push(["Después",g("despues")])}
+var ced=ic?[["Cédula (frente)",g("ced")],["Cédula (trasera)",g("cedt")]]:[];
+if(!casa.length&&!ced.length)return;
+var GAP=4,LB=4.5,BOT=H-M-3,cw=(CW-GAP)/2,CH=ced.length?36:0,cedBlk=ced.length?LB+CH+GAP:0;
+function altoCasa(){return Math.min(cw/AR,BOT-y-cedBlk-(casa.length?LB:0))}
+var hc=altoCasa();if(casa.length&&hc<45&&y>M+40){doc.addPage();y=M;hc=altoCasa()}
+if(casa.length){casa.forEach(function(it,k){var x=casa.length===1?M+(CW-cw)/2:M+k*(cw+GAP);fotoCaja(it,x,y,cw,hc)});y+=LB+hc+GAP}
+if(ced.length){ced.forEach(function(it,k){fotoCaja(it,M+k*(cw+GAP),y,cw,CH)});y+=LB+CH+GAP}}
 var r=repRows(),inf=$("rf").checked,ic=$("rc").checked,RX=M+90,RW=W-M-RX;
 function hdr(d){tx("Informe de reparaciones de viviendas",18,1,2);
 var BB=(d&&d.barrio)||BAR;if(BB)tx("Barrio: "+BB,12,1,0);
@@ -350,7 +364,7 @@ r.forEach(function(d,idx){var f=cache[d.id]||{};
 if(idx>0){doc.addPage();y=M}
 hdr(d);
 var yT=y;tx("Materiales entregados",14,1,1,M,90);matTable(d.mats);var yL=y;y=yT;detail(d,RX,RW);y=Math.max(yL,y)+6;
-photoGrid(buildIts(f,inf,ic,d.id))});
+fotosHoja(f,inf,ic,d.id)});
 var n=doc.getNumberOfPages();for(var pg=1;pg<=n;pg++){doc.setPage(pg);doc.setFontSize(8);doc.setFont("helvetica","normal");doc.text("Página "+pg+" de "+n,W/2,H-7,{align:"center"})}
 return doc.output("blob")}
 function dlPDF(done){done=done||function(){};$("rep").innerHTML=repHTML();if(!DLC){try{window.print()}catch(e){alert("No se pudo crear el PDF aquí.")}done();return}var jobs=[];CROP={};repRows().forEach(function(d){var f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],AR).then(function(c){CROP[d.id+k]=c}))})});Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}if(!b){alert("No se pudo crear el PDF.");done();return}guardar("informe-reparaciones-"+today()+".pdf",b);done()})}
