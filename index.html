@@ -158,7 +158,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <h2>Respaldo</h2>
 <p class="mut" style="margin:0 0 8px">Guarda todo (informes y fotos) en un archivo. «Agregar respaldo» suma los informes de otros teléfonos sin borrar los tuyos. «Restaurar respaldo» reemplaza todo lo que hay.</p>
 <div class="row"><button class="p" type="button" id="bk">Guardar respaldo</button><label class="btn">Agregar respaldo<input type="file" accept=".json,application/json" id="rm" multiple></label><label class="btn">Restaurar respaldo<input type="file" accept=".json,application/json" id="rs"></label></div>
-<p id="mmsg" class="mut" role="status" style="margin:8px 0 0"></p>
+<p id="respdir" class="mut" hidden style="margin:8px 0 0"><span id="respdirt"></span> <button type="button" id="respcam">📁 Cambiar carpeta</button></p><p id="mmsg" class="mut" role="status" style="margin:8px 0 0"></p>
 </section>
 <section class="card rsec" id="v-inf" hidden>
 <h2>Informe para entregar</h2>
@@ -179,13 +179,13 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <div class="row" style="margin:8px 0"><button type="button" id="pall">Marcar todos</button><button type="button" id="pnone">Quitar todos</button></div>
 <div id="plist" style="max-height:320px;overflow:auto;border-top:1px solid #cdd"></div>
 <p id="pcnt" class="mut" style="margin:8px 0" role="status"></p>
-<div class="row" style="margin:0"><button class="p" type="button" id="pgo">Descargar PDF de los elegidos</button><button type="button" id="pimp">🖨️ Imprimir los elegidos</button><button type="button" id="pclose">Cerrar</button></div>
+<div class="row" style="margin:0"><button class="p" type="button" id="pgo" hidden>Descargar PDF de los elegidos</button><button type="button" id="pimp">🖨️ Imprimir los elegidos</button><button type="button" id="pclose">Cerrar</button></div>
 </div>
 <div id="rep" style="margin-top:14px"></div>
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 25-oct-2026 (23)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 25-oct-2026 (24)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -356,7 +356,7 @@ $("fm").innerHTML='<option value="">Todos los meses</option>'+Object.keys(ms).so
 var rows=filtered(),done=rows.filter(function(d){return d.estado==="Terminada"}).length;
 var hoy=today(),hA=data.filter(function(d){return d.fecha===hoy}),hT=hA.filter(function(d){return d.estado==="Terminada"}).length,tT=data.filter(function(d){return d.estado==="Terminada"}).length;
 $("totals").innerHTML='<div class="t"><b>'+hA.length+'</b><span>Viviendas atendidas hoy</span></div><div class="t"><b>'+hT+'</b><span>Terminadas hoy</span></div><div class="t"><b>'+data.length+'</b><span>Total viviendas atendidas</span></div><div class="t"><b>'+tT+'</b><span>Total viviendas terminadas</span></div>';
-$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+(d.barrio?'Barrio '+esc(d.barrio)+' · ':'')+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> '+esc(d.estado)+'</div><div class="row" style="margin-top:6px"><button type="button" data-pdf="'+d.id+'">📄 PDF</button><button type="button" data-imp="'+d.id+'">🖨️ Imprimir</button><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
+$("list").innerHTML=rows.length?rows.map(function(d){return'<details class="fila" data-id="'+d.id+'"'+(OPEN[d.id]?' open':'')+'><summary><span class="fn">'+esc(d.nombre)+'</span><span class="mut fs">'+esc(fd(d.fecha))+' · '+esc(d.estado)+'</span></summary><div class="fb"><div class="mut">'+(d.barrio?'Barrio '+esc(d.barrio)+' · ':'')+esc(d.sector)+(d.tel?' · '+esc(d.tel):'')+'</div><div><b>Reparación:</b> '+esc(d.tipo)+'</div>'+(d.notas?'<div class="mut">'+esc(d.notas)+'</div>':'')+'<div><b>Materiales:</b>'+(d.mats.length?'<ul style="margin:4px 0 0;padding-left:20px">'+d.mats.map(function(m){return'<li>'+esc(m.n)+': '+m.q+' '+un(m.n)+'</li>'}).join("")+'</ul>':' <span class="mut">—</span>')+'</div>'+thumbs(d.id)+'<div><b>Estado:</b> '+esc(d.estado)+'</div><div class="row" style="margin-top:6px"><button type="button" data-pdf="'+d.id+'">Aceptar</button><button type="button" data-imp="'+d.id+'">🖨️ Imprimir</button><button type="button" data-e="'+d.id+'">Editar</button><button type="button" class="bad" data-d="'+d.id+'">Borrar</button></div></div></details>'}).join(""):'<div class="empty">Aún no hay informes. Toca «Nuevo informe», llena los datos y pulsa «Guardar datos y continuar».</div>';
 $("list").querySelectorAll("[data-e]").forEach(function(b){b.onclick=function(){edit(b.dataset.e)}});$("list").querySelectorAll("[data-pdf]").forEach(function(b){b.onclick=function(){pdfPreg(b.dataset.pdf)}});$("list").querySelectorAll("[data-imp]").forEach(function(b){b.onclick=function(){imprimir(data.filter(function(x){return x.id===b.dataset.imp}))}});
 $("list").querySelectorAll("[data-d]").forEach(function(b){b.onclick=function(){del(b.dataset.d)}});$("list").querySelectorAll(".th img").forEach(function(i){i.onclick=function(){big(i.src)}});$("list").querySelectorAll("[data-s]").forEach(function(s){s.onchange=function(){data.forEach(function(d){if(d.id===s.dataset.s)d.estado=s.value});persist();render()}});$("list").querySelectorAll("details.fila").forEach(function(el){el.addEventListener("toggle",function(){if(el.open)OPEN[el.dataset.id]=1;else delete OPEN[el.dataset.id]})});fillDL()}
 function copy(txt){var o=$("out");o.value=txt;o.style.display="block";o.select();
@@ -621,6 +621,19 @@ dg.querySelector("[data-x]").onclick=cerrar;dg.addEventListener("cancel",functio
 dg.querySelectorAll("[data-ab]").forEach(function(b){b.onclick=function(){window.AndroidApp.abrir(L[+b.dataset.ab])}});
 try{dg.showModal()}catch(e){dg.setAttribute("open","")}}
 $("volv1").onclick=function(){show("home")};$("volv2").onclick=function(){show("nuevo")};$("volv3").onclick=function(){show("mats")};
+/* Respaldo en la app Android: un archivo por día, en la carpeta que elija el usuario. Si ya existe el de hoy, pregunta antes de modificarlo */
+var respPend=0;
+function pintaResp(){var A=window.AndroidApp;if(!A||!A.respCarpeta)return;var n=A.respCarpeta();$("respdir").hidden=false;$("respdirt").textContent=n?"Los respaldos se guardan en la carpeta «"+n+"», uno por día.":"Aún no has elegido la carpeta de respaldos. Se te pedirá al tocar «Guardar respaldo».";$("respcam").textContent=n?"📁 Cambiar carpeta":"📁 Elegir carpeta"}
+window.respCarpetaLista=function(n){pintaResp();if(n&&respPend){respPend=0;respSeguir()}else{respPend=0;if(!n)mm("No se eligió ninguna carpeta.")}};
+function respaldoNativo(){var A=window.AndroidApp;if(!A.respCarpeta()){respPend=1;mm("Elige o crea la carpeta donde se guardarán los respaldos (por ejemplo «Respaldos Reparaciones»).");A.elegirCarpetaResp();return}respSeguir()}
+function respSeguir(){var A=window.AndroidApp,nm="respaldo-reparaciones-"+who()+today()+".json";
+function go(){mm("Guardando respaldo…");setTimeout(function(){var ph={};data.forEach(function(d){if(cache[d.id])ph[d.id]=cache[d.id]});
+var j=JSON.stringify({v:1,fecha:today(),data:data,fotos:ph,barrio:BAR,tpl:TPL,per:{d:$("rd").value,h:$("rh").value}});
+var r=A.respInicio(nm);if(r!=="ok"){mm("");alert("No se pudo guardar el respaldo: "+r);return}
+var T=400000,i=0;while(i<j.length&&r==="ok"){var e=Math.min(j.length,i+T);if(e<j.length){var c=j.charCodeAt(e-1);if(c>=0xD800&&c<=0xDBFF)e--}r=A.respParte(j.slice(i,e));i=e}
+var r2=A.respFin();if(r==="ok"&&r2==="ok")mm("✓ Respaldo de hoy guardado en la carpeta «"+A.respCarpeta()+"»: "+nm);else{mm("");alert("No se pudo guardar el respaldo: "+(r!=="ok"?r:r2))}},60)}
+if(A.respExiste(nm))ask("Ya existe el respaldo de hoy ("+fd(today())+") en la carpeta «"+A.respCarpeta()+"». ¿Desea modificarlo con los datos de ahora?",go,"SÍ","NO");else go()}
+if(window.AndroidApp&&window.AndroidApp.respCarpeta){$("bk").hidden=false;$("bk").onclick=respaldoNativo;$("respcam").onclick=function(){respPend=0;window.AndroidApp.elegirCarpetaResp()};pintaResp()}
 if("serviceWorker" in navigator&&!window.AndroidApp){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 </script>
 </body>
