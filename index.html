@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 22-oct-2026 (20)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 24-oct-2026 (21)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -446,7 +446,7 @@ var yT=y;tx("Materiales entregados",14,1,1,M,90);matTable(d.mats);var yL=y;y=yT;
 fotosHoja(f,inf,ic,d.id)});
 var n=doc.getNumberOfPages();for(var pg=1;pg<=n;pg++){doc.setPage(pg);doc.setFontSize(8);doc.setFont("helvetica","normal");doc.text("Página "+pg+" de "+n,W/2,H-7,{align:"center"})}
 return doc.output("blob")}
-function dlPDF(done){done=done||function(){};$("rep").innerHTML=repHTML();if(!DLC){try{window.print()}catch(e){alert("No se pudo crear el PDF aquí.")}done();return}var jobs=[];CROP={};repRows().forEach(function(d){var f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],k.indexOf("ced")===0?CR:AR).then(function(c){CROP[d.id+k]=c}))})});Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}if(!b){alert("No se pudo crear el PDF.");done();return}guardar("Reparaciones-"+who()+"varias-viviendas-"+today()+".pdf",b);done()})}
+function dlPDF(done){done=done||function(){};document.body.classList.remove("imprimiendo");$("rep").innerHTML=repHTML();if(!DLC){try{window.print()}catch(e){alert("No se pudo crear el PDF aquí.")}done();return}var jobs=[];CROP={};repRows().forEach(function(d){var f=cache[d.id]||{};["antes","despues","ced","cedt"].forEach(function(k){if(f[k])jobs.push(cropU(f[k],k.indexOf("ced")===0?CR:AR).then(function(c){CROP[d.id+k]=c}))})});Promise.all(jobs).then(function(){var b=null;try{b=pdfBuild()}catch(e){}if(!b){alert("No se pudo crear el PDF.");done();return}guardar("Reparaciones-"+who()+"varias-viviendas-"+today()+".pdf",b);done()})}
 $("rp").onclick=function(){SEL=null;conCarpeta(function(){dlPDF()})};
 
 var PS={};
@@ -558,7 +558,7 @@ z.innerHTML=h;var PX=96/25.4;
 z.querySelectorAll(".pg").forEach(function(pg){var top=pg.querySelector(".pt").getBoundingClientRect().height/PX,hasCed=!!pg.querySelector(".fced")||ic,ced=hasCed?(4.5+53.98+4):0;
 var hc=Math.min(93.25/.9,254-3-top-ced-4.5-4);if(hc<40)hc=40;pg.querySelectorAll(".fcasa").forEach(function(im){im.style.height=hc+"mm";im.style.width=(hc*.9)+"mm"})});
 var ims=Array.prototype.slice.call(z.querySelectorAll("img"));Promise.all(ims.map(function(i){return i.decode?i.decode().catch(function(){}):0})).then(function(){document.body.classList.add("imprimiendo");setTimeout(function(){if(window.AndroidApp){window.AndroidApp.imprimir("Informe de reparaciones");return}try{window.print()}catch(e){alert("Este teléfono no permite imprimir desde aquí. Descarga el PDF e imprímelo desde Descargas.")}},50)})}
-window.addEventListener("afterprint",function(){document.body.classList.remove("imprimiendo")});
+window.addEventListener("afterprint",function(){if(!window.AndroidApp)document.body.classList.remove("imprimiendo")});
 $("rimp").onclick=function(){imprimir(data)};
 $("pimp").onclick=function(){var ids=Object.keys(PS).filter(function(k){return PS[k]});if(!ids.length){alert("Marca al menos un informe.");return}imprimir(data.filter(function(d){return PS[d.id]}))};
 $("vmi").onclick=function(e){if(window.AndroidApp){e.preventDefault();window.AndroidApp.abrirCarpeta()}};$("vmi").onchange=function(){var f=this.files[0];this.value="";if(!f)return;
