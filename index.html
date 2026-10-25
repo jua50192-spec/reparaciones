@@ -125,20 +125,20 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <select id="estado"><option>Pendiente</option><option>Terminada</option></select></div>
 </div>
 <div style="margin-top:12px"><label for="notas">Notas</label><textarea id="notas" rows="2"></textarea></div>
-<div class="row" style="margin-top:14px"><button class="p" type="button" id="save">Guardar datos y continuar →</button><button type="button" id="cancel" hidden>Cerrar y empezar otro</button></div>
+<div class="row" style="margin-top:14px"><button type="button" id="volv1">← Devolver</button><button class="p" type="button" id="save">Guardar datos y continuar →</button><button type="button" id="cancel" hidden>Cerrar y empezar otro</button></div>
 </div>
 <div id="vw-mats" hidden>
 <h2 style="margin:0 0 8px">Materiales entregados</h2>
 <p id="matnote" class="mut" hidden>🔒 Nombres de materiales bloqueados (las cantidades sí se pueden llenar). <button type="button" id="matunl">Desbloquear con clave</button></p>
 <div id="mats"></div>
 <button type="button" id="addmat">Agregar material</button>
-<div class="row" style="margin-top:14px"><button class="p" type="button" id="savem">Guardar materiales y continuar →</button></div>
+<div class="row" style="margin-top:14px"><button class="p" type="button" id="savem">Guardar materiales y continuar →</button><button type="button" id="volv2">← Devolver</button></div>
 </div>
 <div id="vw-fotos" hidden>
 <h2 style="margin:0 0 8px">Fotos</h2>
 <p class="mut" style="margin:0 0 8px">Las 3 primeras fotos son obligatorias (en la mañana). Con 3 fotos el informe queda <b>Pendiente</b>. Cuando el trabajo termina, agrega la foto «Vivienda después» y queda <b>Terminada</b>.</p>
 <div class="ph" id="ph"></div>
-<div class="row" style="margin-top:14px"><button class="p" type="button" id="savef">Guardar fotos y terminar ✓</button></div>
+<div class="row" style="margin-top:14px"><button class="p" type="button" id="savef">Guardar fotos y terminar ✓</button><button type="button" id="volv3">← Devolver</button></div>
 </div>
 </section>
 
@@ -172,7 +172,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 <p id="rnote" class="mut" hidden>🔒 «Elaborado por» e «Institución / programa» están protegidos con clave. <button type="button" id="runl">Desbloquear con clave</button></p>
 <p id="pernote" class="mut" hidden style="display:none!important">🔒 Periodo bloqueado. <button type="button" id="perunl">Desbloquear con clave</button></p>
 <div class="row"><label style="margin:0"><input type="checkbox" id="rf" checked style="width:auto"> Incluir fotos de la vivienda</label><label style="margin:0"><input type="checkbox" id="rc" checked style="width:auto"> Incluir cédula y teléfono (números y fotos)</label></div>
-<div class="row" id="cdirrow" hidden><button type="button" id="cdir">📁 Elegir carpeta de informes</button><span id="cdirt" class="mut" role="status"></span></div><div class="row"><button class="p" type="button" id="rg">Ver informe</button><button type="button" id="rp">Descargar PDF</button><button type="button" id="rimp">🖨️ Imprimir</button><label class="btn">📂 Ver mis informes<input type="file" accept="application/pdf,.pdf" id="vmi"></label><button type="button" id="rsel">Elegir informes…</button></div><p id="pdfmsg" class="mut" role="status" style="margin:6px 0 0"></p>
+<div class="row" id="cdirrow" hidden><button type="button" id="cdir">📁 Elegir carpeta de informes</button><span id="cdirt" class="mut" role="status"></span></div><div class="row"><button class="p" type="button" id="rg">Ver informe</button><button type="button" id="rp" hidden>Descargar PDF</button><button type="button" id="rimp">🖨️ Imprimir</button><label class="btn">📂 Ver mis informes<input type="file" accept="application/pdf,.pdf" id="vmi"></label><button type="button" id="rsel">Elegir informes…</button></div><p id="pdfmsg" class="mut" role="status" style="margin:6px 0 0"></p>
 <div id="pick" hidden style="margin-top:12px;border:1px solid #9aa;border-radius:8px;padding:10px">
 <b>Elegir qué informes descargar</b>
 <div class="grid" style="margin-top:8px"><div><label for="pq">Buscar por nombre</label><input id="pq" placeholder="Ej. María"></div><div><label for="pd">Fecha exacta (opcional)</label><input type="date" id="pd"></div></div>
@@ -185,7 +185,7 @@ button.bad{border-color:#d9534f;color:#d9534f;padding:9px 10px}
 </section>
 </div>
 
-<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 24-oct-2026 (22)</p>
+<p class="mut" id="ver" style="font-size:.75rem;text-align:center;margin:12px 0 2px">Versión 25-oct-2026 (23)</p>
 <p class="mut" id="cpr" style="font-size:.75rem;text-align:center;margin:0 0 14px">© 2026 Antonio Hernández. Todos los derechos reservados.</p>
 <dialog id="pw"><b id="pwt"></b><p id="pwm" class="mut" style="margin:6px 0"></p><input type="password" id="pw1" autocomplete="off" placeholder="Clave"><input type="password" id="pw2" autocomplete="off" placeholder="Repite la clave" style="margin-top:8px" hidden><p id="pwe" style="color:#d9534f;margin:6px 0" role="alert"></p><div class="row" style="margin:0"><button class="p" type="button" id="pwok">Aceptar</button><button type="button" id="pwno">Cancelar</button></div></dialog>
 <dialog id="ask"><p id="askt" style="margin:0 0 12px"></p><div class="row" style="margin:0"><button class="p" type="button" id="askok">Sí, continuar</button><button type="button" id="askno">Cancelar</button></div></dialog>
@@ -249,6 +249,23 @@ verCed(u).then(function(r){busy[k]=0;if(r.ok){delete smsg[k];fot[k]=u}else smsg[
 /* Cámara con guía del tamaño de la cédula (85.6 x 53.98 mm): solo se guarda lo que queda dentro del recuadro */
 var CAM_R=85.6/53.98;
 function camNativa(k){var i=document.querySelector('#ph input[data-nat][data-k="'+k+'"]');if(i)i.click()}
+function camCasa(k){var md=navigator.mediaDevices;if(!md||!md.getUserMedia){camNativa(k);return}
+var nom=(SL.filter(function(x){return x[0]===k})[0]||[0,"Foto"])[1];
+var ov=document.createElement("div");ov.className="camov";
+ov.innerHTML='<video playsinline autoplay muted style="object-fit:contain"></video><img class="camprev" alt="Foto" hidden>'+
+'<div class="cambar"><button type="button" class="x" data-a="no">Cancelar</button><button type="button" class="p" data-a="si">📷 Tomar foto</button>'+
+'<button type="button" class="x" data-a="rep" hidden>Repetir</button><button type="button" class="p" data-a="ok" hidden>Usar esta foto ✓</button></div>';
+document.body.appendChild(ov);var tt=document.createElement("div");tt.className="camtit";tt.textContent=String(nom).toUpperCase();ov.appendChild(tt);
+var v=ov.querySelector("video"),pv=ov.querySelector(".camprev"),st=null,url=null;
+function btn(a){return ov.querySelector('[data-a="'+a+'"]')}
+function cerrar(){if(st)st.getTracks().forEach(function(t){t.stop()});ov.remove()}
+function modo(prev){pv.hidden=!prev;v.hidden=prev;btn("si").hidden=prev;btn("rep").hidden=!prev;btn("ok").hidden=!prev}
+md.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false}).then(function(s){st=s;v.srcObject=s;var p=v.play();if(p&&p.catch)p.catch(function(){})},function(){cerrar();camNativa(k)});
+btn("no").onclick=cerrar;
+btn("si").onclick=function(){var vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return;var e=Math.min(1,1280/Math.max(vw,vh)),c=document.createElement("canvas");c.width=Math.round(vw*e);c.height=Math.round(vh*e);
+c.getContext("2d").drawImage(v,0,0,c.width,c.height);url=c.toDataURL("image/jpeg",.8);pv.src=url;modo(true)};
+btn("rep").onclick=function(){url=null;modo(false)};
+btn("ok").onclick=function(){var u=url;cerrar();if(u)usarFoto(k,u)}}
 function camCed(k){var md=navigator.mediaDevices;if(!md||!md.getUserMedia){camNativa(k);return}
 var ov=document.createElement("div");ov.className="camov";
 ov.innerHTML='<video playsinline autoplay muted></video><div class="camfr"><i></i><i></i><i></i><i></i></div>'+
@@ -274,10 +291,10 @@ if(!r.ok){NOK=(NOK||0)+1;tx.innerHTML='<span style="color:#ff8a80;font-weight:70
 tx.innerHTML="✓ Lado correcto. ¿Se lee bien? Si está borrosa, toca <b>Repetir</b>.";btn("ok").textContent="Usar esta foto ✓";btn("ok").hidden=false})};
 btn("rep").onclick=function(){url=null;modo(false)};
 btn("ok").onclick=function(){var u=url;cerrar();if(u)usarFoto(k,u,1)}}
-function drawSlots(){var h="";SL.forEach(function(s){var k=s[0],has=!!fot[k];h+='<div class="slot"><b>'+s[1]+(k==="despues"?"":' <span class="req">*</span>')+'</b>'+(has?'<img src="'+fot[k]+'" alt="'+s[1]+'"'+(k==="ced"||k==="cedt"?' class="cedimg"':'')+'>':'<div class="nof">Sin foto</div>')+'<div class="row" style="margin-top:6px">'+(k==="ced"||k==="cedt"?'<button type="button" class="btn" data-cam="'+k+'">Tomar foto</button>':'')+'<label class="btn"'+(k==="ced"||k==="cedt"?' hidden':'')+'>Tomar foto<input type="file" accept="image/*" capture="environment" data-k="'+k+'"'+(k==="ced"||k==="cedt"?' data-nat="1" hidden':'')+'></label><label class="btn"'+(k==="ced"||k==="cedt"?' hidden':'')+'>Galería<input type="file" accept="image/*" data-k="'+k+'"></label>'+(has?'<button type="button" class="x" style="padding:9px 10px" data-r="'+k+'">Quitar</button>':'')+'</div>'+(smsg[k]?'<p style="margin:6px 0 0;font-size:.9rem;color:'+(smsg[k].bad?'#d9534f':'var(--mute)')+'" role="alert">'+esc(smsg[k].t)+'</p>':'')+'</div>'});
+function drawSlots(){var h="";SL.forEach(function(s){var k=s[0],has=!!fot[k];h+='<div class="slot"><b>'+s[1]+(k==="despues"?"":' <span class="req">*</span>')+'</b>'+(has?'<img src="'+fot[k]+'" alt="'+s[1]+'"'+(k==="ced"||k==="cedt"?' class="cedimg"':'')+'>':'<div class="nof">Sin foto</div>')+'<div class="row" style="margin-top:6px"><button type="button" class="btn" data-cam="'+k+'">Tomar foto</button><label class="btn" hidden>Tomar foto<input type="file" accept="image/*" capture="environment" data-k="'+k+'" data-nat="1" hidden></label><label class="btn"'+(k==="ced"||k==="cedt"?' hidden':'')+'>Galería<input type="file" accept="image/*" data-k="'+k+'"></label>'+(has?'<button type="button" class="x" style="padding:9px 10px" data-r="'+k+'">Quitar</button>':'')+'</div>'+(smsg[k]?'<p style="margin:6px 0 0;font-size:.9rem;color:'+(smsg[k].bad?'#d9534f':'var(--mute)')+'" role="alert">'+esc(smsg[k].t)+'</p>':'')+'</div>'});
 $("ph").innerHTML=h;
 $("ph").querySelectorAll("input[type=file]").forEach(function(i){i.onchange=function(){var k=i.dataset.k,fl=i.files[0];i.value="";if(!fl||busy[k])return;shrink(fl,function(u){usarFoto(k,u)})}});
-$("ph").querySelectorAll("[data-cam]").forEach(function(b){b.onclick=function(){var k=b.dataset.cam;if(busy[k])return;camCed(k)}});
+$("ph").querySelectorAll("[data-cam]").forEach(function(b){b.onclick=function(){var k=b.dataset.cam;if(busy[k])return;if(k==="ced"||k==="cedt")camCed(k);else camCasa(k)}});
 $("ph").querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){delete fot[b.dataset.r];delete smsg[b.dataset.r];drawSlots()}});
 $("ph").querySelectorAll(".slot img").forEach(function(i){i.onclick=function(){big(i.src)}});saveDraft()}
 $("closed").onclick=function(){$("dlg").close()};
@@ -584,16 +601,26 @@ else t=(nuevos?"✓ Se guardaron "+nuevos+" informe(s) nuevo(s). ":"")+(ya.lengt
 t=t.trim()||"No se guardó nada.";m.textContent=t;alert(t)}
 conCarpeta(sig)}
 /* Ver mis informes (app Android): lista dentro de la app; Abrir o Compartir con un toque, y "atrás" vuelve a la app */
-function misInformes(){var L=[];try{L=JSON.parse(window.AndroidApp.listar()||"[]")}catch(e){}
+function infoArchivo(n){var d=data.filter(function(x){return nomPDF(x)===n})[0];if(d)return{nom:d.nombre,ced:d.ced||""};
+var m=/cedula-([0-9-]+)\.pdf$/i.exec(n);if(m){var dig=m[1].replace(/-/g,"");d=data.filter(function(x){return cedLimpia(x)===dig})[0];return{nom:d?d.nombre:"(beneficiario no encontrado)",ced:m[1]}}
+if(/varias-viviendas/i.test(n)){var f=/(\d{4}-\d{2}-\d{2})/.exec(n);return{nom:"Varias viviendas"+(f?" · "+fd(f[1]):""),ced:""}}
+return{nom:n.replace(/^Reparaciones-/,"").replace(/\.pdf$/i,"").replace(/-/g," "),ced:""}}
+function misInformes(){var L=[];try{L=JSON.parse(window.AndroidApp.listar()||"[]")}catch(e){}var SELI={};
 var dg=document.createElement("dialog");dg.className="bienv";
-dg.innerHTML='<h2 style="margin:0 0 4px">Mis informes</h2><p class="mut" style="margin:0 0 8px">Descargas › Reparaciones · '+L.length+' archivo(s)</p><div style="max-height:60vh;overflow:auto">'+
-(L.length?L.map(function(n,i){return'<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div style="word-break:break-all;font-size:.9rem">'+esc(n)+'</div><div class="row" style="margin:6px 0 0"><button type="button" data-ab="'+i+'">📄 Abrir</button><button type="button" data-co="'+i+'">📤 Compartir</button></div></div>'}).join(""):'<p>Aún no hay informes guardados.</p>')+
-'</div><div class="row" style="margin-top:10px"><button class="p" type="button" data-x="1">Cerrar</button></div>';
+dg.innerHTML='<h2 style="margin:0 0 4px">Mis informes</h2><p class="mut" style="margin:0 0 8px">'+L.length+' informe(s) guardado(s). Marca los que quieras compartir.</p><div style="max-height:55vh;overflow:auto;border-top:1px solid var(--line)">'+
+(L.length?L.map(function(n,i){var x=infoArchivo(n);return'<div style="display:flex;gap:10px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line)"><input type="checkbox" data-ch="'+i+'" style="width:26px;height:26px;flex:none;margin:0"><label data-lb="'+i+'" style="flex:1;margin:0;font-weight:400;cursor:pointer"><b>'+esc(x.nom)+'</b>'+(x.ced?'<br><small>Cédula: '+esc(x.ced)+'</small>':'')+'</label><button type="button" data-ab="'+i+'" style="flex:none">📄 Abrir</button></div>'}).join(""):'<p>Aún no hay informes guardados.</p>')+
+'</div><div class="row" style="margin-top:10px"><button type="button" data-all="1">Marcar todos</button><button class="p" type="button" data-sh="1" disabled>📤 Compartir</button><button type="button" data-x="1">Cerrar</button></div>';
 document.body.appendChild(dg);function cerrar(){try{dg.close()}catch(e){}dg.remove()}
+var bsh=dg.querySelector("[data-sh]"),ball=dg.querySelector("[data-all]");
+function cuenta(){var n=Object.keys(SELI).length;bsh.disabled=!n;bsh.textContent="📤 Compartir"+(n?" ("+n+")":"");ball.textContent=n===L.length&&n?"Quitar todos":"Marcar todos"}
+dg.querySelectorAll("[data-ch]").forEach(function(c){c.onchange=function(){if(c.checked)SELI[c.dataset.ch]=1;else delete SELI[c.dataset.ch];cuenta()}});
+dg.querySelectorAll("[data-lb]").forEach(function(l){l.onclick=function(){var c=dg.querySelector('[data-ch="'+l.dataset.lb+'"]');c.checked=!c.checked;c.onchange()}});
+ball.onclick=function(){var todos=Object.keys(SELI).length!==L.length;SELI={};dg.querySelectorAll("[data-ch]").forEach(function(c){c.checked=todos;if(todos)SELI[c.dataset.ch]=1});cuenta()};
+bsh.onclick=function(){var ns=Object.keys(SELI).map(function(i){return L[+i]});if(!ns.length)return;if(window.AndroidApp.compartirVarios)window.AndroidApp.compartirVarios(JSON.stringify(ns));else window.AndroidApp.compartir(ns[0])};
 dg.querySelector("[data-x]").onclick=cerrar;dg.addEventListener("cancel",function(e){e.preventDefault();cerrar()});
 dg.querySelectorAll("[data-ab]").forEach(function(b){b.onclick=function(){window.AndroidApp.abrir(L[+b.dataset.ab])}});
-dg.querySelectorAll("[data-co]").forEach(function(b){b.onclick=function(){window.AndroidApp.compartir(L[+b.dataset.co])}});
 try{dg.showModal()}catch(e){dg.setAttribute("open","")}}
+$("volv1").onclick=function(){show("home")};$("volv2").onclick=function(){show("nuevo")};$("volv3").onclick=function(){show("mats")};
 if("serviceWorker" in navigator&&!window.AndroidApp){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 </script>
 </body>
